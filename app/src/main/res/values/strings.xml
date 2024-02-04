@@ -5,7 +5,8 @@
     <string name="password">Password</string>
     <string name="c_password">Confirm Password</string>
     <string name="d_name">Display Name</string>
-    <string name="upload_pic">Upload Profile Picture</string>
+    <string name="profile_pic">Profile Picture</string>
+    <string name="upload">Upload</string>
 
 
 
