@@ -57,14 +57,6 @@
         android:layout_below="@id/postImageView"
         android:layout_marginTop="8dp"/>
 
-    <!-- Comments Section -->
-    <TextView
-        android:id="@+id/commentsTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Comments:"
-        android:layout_below="@id/dateTextView"
-        android:layout_marginTop="8dp"/>
 
     <!-- Like, Share, Comment Buttons -->
     <LinearLayout
@@ -72,7 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_below="@id/commentsTextView"
+        android:layout_below="@id/dateTextView"
         android:layout_marginTop="8dp">
 
         <Button
@@ -100,10 +92,21 @@
     <!-- EditText for adding comments (Initially set to GONE) -->
     <EditText
         android:id="@+id/commentEditText"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Add a comment..."
-        android:layout_below="@id/commentsTextView"
+        android:layout_below="@id/buttonsLayout"
         android:layout_marginTop="8dp"
-        android:visibility="gone"/> <!-- Initially set to GONE -->
+        android:layout_weight="1"
+        android:visibility="gone"
+        android:hint="Add a comment..."/>
+
+    <!-- Post Button (Initially set to GONE) -->
+    <Button
+        android:id="@+id/postButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttonsLayout"
+        android:layout_marginTop="8dp"
+        android:text="Post"
+        android:visibility="gone"/>
 </RelativeLayout>

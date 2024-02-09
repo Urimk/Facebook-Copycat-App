@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,20 +57,29 @@ public class PostAdapter extends BaseAdapter {
         Button likeButton = view.findViewById(R.id.likeButton);
         Button shareButton = view.findViewById(R.id.shareButton);
         Button commentButton = view.findViewById(R.id.commentButton);
-        TextView commentsTextView = view.findViewById(R.id.commentsTextView);
-
+        Button postButton = view.findViewById(R.id.postButton);
+        EditText commentEditText = view.findViewById(R.id.commentEditText);
         postContentTextView.setText(currentPost.getText());
-        commentsTextView.setText(buildCommentsText(currentPost.getComments()));
+
         // Set other details as needed...
 
         // Set a click listener for the Comment button
         commentButton.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
-                // Show a dialog or navigate to a new activity to add a comment
-                // You can implement this based on your preference
-                // For simplicity, I'm showing a toast here
-                Toast.makeText(context, "Add your comment functionality here", Toast.LENGTH_SHORT).show();
+                // Toggle visibility of the commentEditText and postButton
+                int commentVisibility = commentEditText.getVisibility();
+
+                // If commentEditText is currently gone, make it visible along with the postButton
+                if (commentVisibility == View.GONE) {
+                    commentEditText.setVisibility(View.VISIBLE);
+                    postButton.setVisibility(View.VISIBLE);
+                } else {
+                    // If commentEditText is currently visible, make it gone along with the postButton
+                    commentEditText.setVisibility(View.GONE);
+                    postButton.setVisibility(View.GONE);
+                }
             }
         });
 
