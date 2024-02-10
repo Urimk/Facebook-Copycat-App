@@ -123,10 +123,18 @@
                     android:id="@+id/textViewProfilePicture"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="85dp"
+                    android:layout_marginStart="45dp"
                     android:layout_marginTop="12dp"
                     android:fontFamily="@font/poppins_regular"
                     android:text="@string/profile_pic" />
+
+                <ImageView
+                    android:id="@+id/pfpPreview"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:scaleType="centerInside"
+                    android:layout_marginStart="20dp"
+                    android:layout_toEndOf="@id/textViewProfilePicture"/>
 
                 <Button
                     android:id="@+id/buttonUploadImage"
@@ -134,7 +142,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
                     android:layout_marginStart="24dp"
-                    android:layout_toEndOf="@id/textViewProfilePicture"
+                    android:layout_toEndOf="@id/pfpPreview"
                     android:backgroundTint="@color/blue"
                     android:text="@string/upload" />
             </RelativeLayout>

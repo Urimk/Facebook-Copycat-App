@@ -1,13 +1,25 @@
 package com.example.facebookapp;
 
+import androidx.activity.result.ActivityResult;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class RegisterActivity extends AppCompatActivity {
+    private final int PICK_IMAGE_REQUEST = 1;
+    private ImageView pfpPreview;
+    private Uri pfpUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +31,8 @@ public class RegisterActivity extends AppCompatActivity {
         EditText editTextConfirmPassword = findViewById(R.id.editTextConfirmPassword);
         EditText editTextDisplayName = findViewById(R.id.editTextDisplayName);
         Button buttonRegister = findViewById(R.id.buttonRegister);
+        Button buttonUploadImg = findViewById(R.id.buttonUploadImage);
+        pfpPreview = findViewById(R.id.pfpPreview);
         TextView errorUsername = findViewById(R.id.errorUsername);
         TextView errorPassword = findViewById(R.id.errorPassword);
         TextView errorConfirmPassword = findViewById(R.id.errorConfirmPassword);
@@ -30,9 +44,11 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // Validate and show errors
+                int errorFlag = 0;
                 if (!isValidUsername(editTextUsername.getText().toString())) {
                     errorUsername.setText("Username must contain only letters and numbers and be shorter than 16 characters");
                     errorUsername.setVisibility(View.VISIBLE);
+                    errorFlag = 1;
                 } else {
                     errorUsername.setVisibility(View.GONE);
                 }
@@ -40,6 +56,7 @@ public class RegisterActivity extends AppCompatActivity {
                 if (!isValidPassword(editTextPassword.getText().toString())) {
                     errorPassword.setText("Password must have an uppercase letter and a number");
                     errorPassword.setVisibility(View.VISIBLE);
+                    errorFlag = 1;
                 } else {
                     errorPassword.setVisibility(View.GONE);
                 }
@@ -49,6 +66,7 @@ public class RegisterActivity extends AppCompatActivity {
                         editTextConfirmPassword.getText().toString())) {
                     errorConfirmPassword.setText("Passwords do not match");
                     errorConfirmPassword.setVisibility(View.VISIBLE);
+                    errorFlag = 1;
                 } else {
                     errorConfirmPassword.setVisibility(View.GONE);
                 }
@@ -56,10 +74,25 @@ public class RegisterActivity extends AppCompatActivity {
                 if (!isValidDisplayName(editTextDisplayName.getText().toString())) {
                     errorDisplayName.setText("Display name must contain only letters and numbers and be shorter than 16 characters");
                     errorDisplayName.setVisibility(View.VISIBLE);
+                    errorFlag = 1;
                 } else {
                     errorDisplayName.setVisibility(View.GONE);
                 }
 
+                if (errorFlag == 0) {
+                    User user = new User(editTextUsername.getText(), pfpUri.toString(),
+                            editTextDisplayName.getText(), editTextPassword.getText());
+                    DB.getUsersDB().addUser(user);
+                }
+
+            }
+        });
+
+        buttonUploadImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(intent, PICK_IMAGE_REQUEST);
             }
         });
     }
@@ -84,4 +117,16 @@ public class RegisterActivity extends AppCompatActivity {
         return displayName.matches("^[a-zA-Z0-9]{1,16}$");
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
+                pfpUri = data.getData();
+                pfpPreview.setImageURI(pfpUri);
+
+            }
+        }
+    }
 }
