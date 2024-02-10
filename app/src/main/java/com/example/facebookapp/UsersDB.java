@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UsersDB {
+    public static final int REGISTRATION_FAILED = -1;
     private List<User> users;
     private int nextNewUserId;
 
@@ -50,12 +51,18 @@ public class UsersDB {
         return null; // a user with that username was not found
     }
 
-    public int addUser(User user) {
-        User newUser = new User(user.getUserName(), user.getUserPfp(), user.getUserNick(),
-                this.nextNewUserId, user.getUserPass());
+    public int addUser(User newUser) {
+        for (User user: this.users) {
+            if (newUser.getUserName().equals(user.getUserName())) {
+                // a user with that name already exists
+                return REGISTRATION_FAILED;
+            }
+        }
+        User newerUser = new User(newUser.getUserName(), newUser.getUserPfp(), newUser.getUserNick(),
+                this.nextNewUserId, newUser.getUserPass());
         this.nextNewUserId++;
-        this.users.add(newUser);
-        return newUser.getUserId();
+        this.users.add(newerUser);
+        return newerUser.getUserId();
     }
 
 }
