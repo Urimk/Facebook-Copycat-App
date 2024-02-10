@@ -1,0 +1,13 @@
+{
+  "posts": [{"postId" :  1, "likes": 4, "shares": 2, "authorId": 1,
+  "time": {"year": 1999, "month": 3, "day": 20, "hour": 21, "minute": 3},
+  "edited": true, "content": "basic post content", "authorName": "Doctor",
+  "authorPfp": "", "img": "",
+    "comments": [
+      {"authorId": 2, "time": {"year": 2000, "month": 12, "day": 2, "hour": 12,
+      "minute": 20}, "edited": false, "content": "comment content",
+        "authorName": "comment Author", "authorPfp": "", "commentId": 1},
+      {"authorId": 3, "time": {"year": 2010, "month": 10, "day": 2, "hour": 12,
+        "minute": 20}, "edited": false, "content": "2nd comment content",
+        "authorName": "comment Author2", "authorPfp": "pfp", "commentId": 3}]}]
+}
