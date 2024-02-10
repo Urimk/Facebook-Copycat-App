@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -37,17 +38,23 @@ public class FeedActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Create a new PostItem with the entered text
-                String postText = postEditText.getText().toString();
-                PostItem newPostItem = new PostItem(postText);
+                String postText = postEditText.getText().toString().trim(); // Trim leading and trailing whitespaces
+                if (!postText.isEmpty()) {
+                    // Only proceed if the post text is not empty
+                    PostItem newPostItem = new PostItem(postText);
 
-                // Add the new post to the list
-                postList.add(newPostItem);
+                    // Add the new post to the list
+                    postList.add(newPostItem);
 
-                // Update the ListView
-                ((PostAdapter) postsListView.getAdapter()).notifyDataSetChanged();
+                    // Update the ListView
+                    ((PostAdapter) postsListView.getAdapter()).notifyDataSetChanged();
 
-                // Clear the EditText after posting
-                postEditText.getText().clear();
+                    // Clear the EditText after posting
+                    postEditText.getText().clear();
+                } else {
+                    // Show a toast message or take appropriate action for empty post
+                    Toast.makeText(FeedActivity.this, "Post cannot be empty", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -73,6 +80,10 @@ public class FeedActivity extends AppCompatActivity {
             return commentText;
         }
 
+        public void setCommentText(String text) {
+            this.commentText = text;
+        }
+
         public String getDisplayName() {
             return displayName;
         }
@@ -96,6 +107,10 @@ public class FeedActivity extends AppCompatActivity {
 
         public String getText() {
             return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
         }
 
         public List<CommentItem> getComments() {

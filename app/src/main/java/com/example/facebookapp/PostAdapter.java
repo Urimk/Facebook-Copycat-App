@@ -1,6 +1,8 @@
 package com.example.facebookapp;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -59,11 +62,34 @@ public class PostAdapter extends BaseAdapter {
         Button commentButton = view.findViewById(R.id.commentButton);
         Button postButton = view.findViewById(R.id.postButton);
         EditText commentEditText = view.findViewById(R.id.commentEditText);
+
+        // Add click listener to the delete icon
+        ImageView deleteIcon = view.findViewById(R.id.deleteIcon);
+        deleteIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Remove the current post from the list
+                postList.remove(position);
+
+                // Update the adapter to reflect the changes
+                notifyDataSetChanged();
+            }
+        });
+
+        // Add click listener to the edit icon
+        ImageView editIcon = view.findViewById(R.id.editIcon);
+        editIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Provide a way for the user to edit the post content
+                showEditDialog(currentPost, position);
+            }
+        });
+
         postContentTextView.setText(currentPost.getText());
 
-        // Set a click listener for the Comment button
+        // Set click listener for the Comment button
         commentButton.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 // Toggle visibility of the commentEditText and postButton
@@ -84,6 +110,8 @@ public class PostAdapter extends BaseAdapter {
         CommentAdapter commentAdapter = new CommentAdapter(context, currentPost.getComments());
         ListView commentListView = view.findViewById(R.id.commentListView);
         commentListView.setAdapter(commentAdapter);
+
+        // Set click listener for the Post button
         postButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -100,11 +128,49 @@ public class PostAdapter extends BaseAdapter {
 
                     // Clear the EditText after posting
                     commentEditText.getText().clear();
+                } else {
+                    // Show a toast message or take appropriate action for empty comment
+                    Toast.makeText(context, "Comment cannot be empty", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
         return view;
+    }
+
+    // Method to show a dialog for post editing
+    private void showEditDialog(FeedActivity.PostItem postItem, int position) {
+        // Create a dialog with an EditText for post editing
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle("Edit Post");
+
+        final EditText editPostEditText = new EditText(context);
+        editPostEditText.setText(postItem.getText());
+        builder.setView(editPostEditText);
+
+        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Update the post content and notify the adapter if the text is not empty
+                String updatedPostText = editPostEditText.getText().toString().trim();
+                if (!updatedPostText.isEmpty()) {
+                    postItem.setText(updatedPostText);
+                    notifyDataSetChanged();
+                } else {
+                    // Show a toast message or take appropriate action for empty post
+                    Toast.makeText(context, "Post cannot be empty", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Do nothing if the user cancels
+            }
+        });
+
+        builder.show();
     }
 
     private String buildCommentsText(List<FeedActivity.CommentItem> comments) {

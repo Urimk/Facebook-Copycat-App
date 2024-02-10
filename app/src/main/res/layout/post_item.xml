@@ -27,6 +27,25 @@
             android:textSize="16sp"
             android:layout_toEndOf="@+id/profileImageView"
             android:layout_marginStart="8dp"/>
+
+        <!-- Edit Icon -->
+        <ImageView
+            android:id="@+id/editIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/edit_icon"
+            android:layout_toStartOf="@id/deleteIcon"
+            android:layout_centerVertical="true"/>
+
+        <!-- Delete Icon -->
+        <ImageView
+            android:id="@+id/deleteIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/delete_icon"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"/>
+
     </RelativeLayout>
 
     <!-- Post Text -->
@@ -45,7 +64,8 @@
         android:layout_height="200dp"
         android:layout_below="@id/postContentTextView"
         android:layout_marginTop="8dp"
-        android:scaleType="centerCrop"/>
+        android:scaleType="centerCrop"
+        android:visibility="gone"/>
 
     <!-- Date of the Post -->
     <TextView
