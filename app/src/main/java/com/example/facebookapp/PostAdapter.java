@@ -8,8 +8,8 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public class PostAdapter extends BaseAdapter {
 
     private List<FeedActivity.PostItem> postList;
     private LayoutInflater inflater;
-    private Context context; // Add this variable
+    private Context context;
 
     public PostAdapter(Context context, List<FeedActivity.PostItem> postList) {
         this.context = context;
@@ -61,8 +61,6 @@ public class PostAdapter extends BaseAdapter {
         EditText commentEditText = view.findViewById(R.id.commentEditText);
         postContentTextView.setText(currentPost.getText());
 
-        // Set other details as needed...
-
         // Set a click listener for the Comment button
         commentButton.setOnClickListener(new View.OnClickListener() {
 
@@ -79,6 +77,29 @@ public class PostAdapter extends BaseAdapter {
                     // If commentEditText is currently visible, make it gone along with the postButton
                     commentEditText.setVisibility(View.GONE);
                     postButton.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        CommentAdapter commentAdapter = new CommentAdapter(context, currentPost.getComments());
+        ListView commentListView = view.findViewById(R.id.commentListView);
+        commentListView.setAdapter(commentAdapter);
+        postButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Extract the comment from the EditText
+                String commentText = commentEditText.getText().toString();
+
+                // Check if the comment is not empty
+                if (!commentText.isEmpty()) {
+                    // Add the comment to the current post item
+                    currentPost.addComment(commentText, "User", "Just now");
+
+                    // Update the CommentAdapter to reflect the new comment
+                    commentAdapter.notifyDataSetChanged();
+
+                    // Clear the EditText after posting
+                    commentEditText.getText().clear();
                 }
             }
         });

@@ -57,7 +57,6 @@
         android:layout_below="@id/postImageView"
         android:layout_marginTop="8dp"/>
 
-
     <!-- Like, Share, Comment Buttons -->
     <LinearLayout
         android:id="@+id/buttonsLayout"
@@ -92,21 +91,29 @@
     <!-- EditText for adding comments (Initially set to GONE) -->
     <EditText
         android:id="@+id/commentEditText"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/buttonsLayout"
-        android:layout_marginTop="8dp"
-        android:layout_weight="1"
+        android:layout_toStartOf="@+id/postButton"
+        android:hint="Write your comment"
         android:visibility="gone"
-        android:hint="Add a comment..."/>
+        android:padding="8dp"/>
 
-    <!-- Post Button (Initially set to GONE) -->
+    <!-- Post Button on the right -->
     <Button
         android:id="@+id/postButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_below="@id/buttonsLayout"
-        android:layout_marginTop="8dp"
-        android:text="Post"
-        android:visibility="gone"/>
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:visibility="gone"
+        android:text="Post"/>
+
+    <ListView
+        android:id="@+id/commentListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/commentEditText"
+        android:nestedScrollingEnabled="true"
+        android:layout_marginTop="8dp"/>
 </RelativeLayout>
