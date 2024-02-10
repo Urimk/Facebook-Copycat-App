@@ -82,7 +82,15 @@ public class RegisterActivity extends AppCompatActivity {
                 if (errorFlag == 0) {
                     User user = new User(editTextUsername.getText(), pfpUri.toString(),
                             editTextDisplayName.getText(), editTextPassword.getText());
-                    DB.getUsersDB().addUser(user);
+                    int code = DB.getUsersDB().addUser(user);
+
+                    if (code == UsersDB.REGISTRATION_FAILED) {
+                        errorUsername.setText("A user with that username already exists");
+                        errorUsername.setVisibility(View.VISIBLE);
+                    }
+                    else {
+                        finish(); // user has registered- take him back to MainActivity
+                    }
                 }
 
             }
