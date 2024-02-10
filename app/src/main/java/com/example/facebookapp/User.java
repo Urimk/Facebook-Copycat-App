@@ -48,4 +48,15 @@ public class User {
     public String getUserPass() {
         return userPass;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userName='" + userName + '\'' +
+                ", userPfp='" + userPfp + '\'' +
+                ", userNick='" + userNick + '\'' +
+                ", userId=" + userId +
+                ", userPass='" + userPass + '\'' +
+                '}';
+    }
 }

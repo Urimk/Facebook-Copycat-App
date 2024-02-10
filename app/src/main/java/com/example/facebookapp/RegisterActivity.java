@@ -25,6 +25,7 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        DB db= new DB(this);
 
         EditText editTextUsername = findViewById(R.id.editTextUsername);
         EditText editTextPassword = findViewById(R.id.editTextPassword);
@@ -80,8 +81,9 @@ public class RegisterActivity extends AppCompatActivity {
                 }
 
                 if (errorFlag == 0) {
-                    User user = new User(editTextUsername.getText(), pfpUri.toString(),
-                            editTextDisplayName.getText(), editTextPassword.getText());
+                    User user = new User(editTextUsername.getText().toString(), pfpUri.toString(),
+                            editTextDisplayName.getText().toString(),
+                            editTextPassword.getText().toString());
                     int code = DB.getUsersDB().addUser(user);
 
                     if (code == UsersDB.REGISTRATION_FAILED) {
@@ -89,6 +91,7 @@ public class RegisterActivity extends AppCompatActivity {
                         errorUsername.setVisibility(View.VISIBLE);
                     }
                     else {
+                        Log.v("user", DB.getUsersDB().getUserById(0).toString());
                         finish(); // user has registered- take him back to MainActivity
                     }
                 }
