@@ -19,16 +19,21 @@ public class CommentAdapter extends BaseAdapter {
     private List<Comment> commentList;
     private LayoutInflater inflater;
     private Context context;
-    private DB database; // Add a reference to the database
-    private Post associatedPost; // Add a reference to the associated Post
+    private DB database; // Reference to the database
+    private Post associatedPost; // Reference to the associated Post
 
-
-    public CommentAdapter(Context context, List<Comment> commentList, DB database) {
+    public CommentAdapter(Context context, List<Comment> commentList, DB database, Post associatedPost) {
         this.context = context;
         this.commentList = commentList;
         this.inflater = LayoutInflater.from(context);
         this.database = database; // Initialize the reference to the database
         this.associatedPost = associatedPost; // Initialize the reference to the associated Post
+    }
+
+    public void updateComments(List<Comment> newComments) {
+        commentList.clear();
+        commentList.addAll(newComments);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -71,14 +76,11 @@ public class CommentAdapter extends BaseAdapter {
         deleteIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Remove the current comment from the list
-                commentList.remove(position);
+                // Remove the current comment from the database
+                database.getPostsDB().removeComment(associatedPost, currentComment);
 
                 // Update the adapter to reflect the changes
-                notifyDataSetChanged();
-
-                // Update the database to reflect the deletion
-                database.getPostsDB().removeComment(associatedPost, currentComment);
+                updateComments(database.getPostsDB().getPostById(associatedPost.getPostId()).getComments());
 
                 // Optionally, you can show a toast message or perform other actions
                 Toast.makeText(context, "Comment deleted", Toast.LENGTH_SHORT).show();
@@ -90,7 +92,7 @@ public class CommentAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 // Show an edit dialog for the comment
-                showEditDialog(currentComment, position);
+                showEditDialog(currentComment);
             }
         });
 
@@ -98,7 +100,7 @@ public class CommentAdapter extends BaseAdapter {
     }
 
     // Method to show a dialog for comment editing
-    private void showEditDialog(Comment comment, int position) {
+    private void showEditDialog(Comment comment) {
         // Create a dialog with an EditText for comment editing
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Edit Comment");
@@ -135,3 +137,4 @@ public class CommentAdapter extends BaseAdapter {
         builder.show();
     }
 }
+

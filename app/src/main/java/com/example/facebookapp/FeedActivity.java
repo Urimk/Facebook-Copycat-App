@@ -20,7 +20,6 @@ public class FeedActivity extends AppCompatActivity {
     private Button postButton;
     private ListView postsListView;
 
-    private List<Post> postList = new ArrayList<>();
     private User currentUser;  // Sample session user
     private DB database; // Reference to the database
 
@@ -50,14 +49,14 @@ public class FeedActivity extends AppCompatActivity {
                     // Create a new Post object using the sample session user's data
                     Post newPost = new Post(currentUser.getUserName(), currentUser.getUserPfp(), postText, "", currentUser.getUserId());
 
-                    // Add the new post to the list
-                    postList.add(newPost);
-
-                    // Update the ListView
-                    ((PostAdapter) postsListView.getAdapter()).notifyDataSetChanged();
-
                     // Update the posts in the database
                     database.getPostsDB().addPost(newPost);
+
+                    // Retrieve all posts from the database
+                    List<Post> allPosts = database.getPostsDB().getAllPosts();
+
+                    // Update the ListView with the retrieved posts
+                    ((PostAdapter) postsListView.getAdapter()).updatePosts(allPosts);
 
                     // Clear the EditText after posting
                     postEditText.getText().clear();
@@ -69,7 +68,13 @@ public class FeedActivity extends AppCompatActivity {
         });
 
         // Set up the ListView with the PostAdapter
-        PostAdapter adapter = new PostAdapter(this, postList, currentUser, database);
+        PostAdapter adapter = new PostAdapter(this, new ArrayList<>(), currentUser, database);
         postsListView.setAdapter(adapter);
+
+        // Retrieve all posts from the database
+        List<Post> allPosts = database.getPostsDB().getAllPosts();
+
+        // Update the ListView with the retrieved posts
+        adapter.updatePosts(allPosts);
     }
 }
