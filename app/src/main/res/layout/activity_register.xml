@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 
-    tools:context=".MainActivity">
+    tools:context=".RegisterActivity">
 
     <ImageView
         android:id="@+id/imageViewBackground"
@@ -48,6 +48,14 @@
                 android:hint="@string/username"
                 android:padding="8dp" />
 
+            <TextView
+                android:id="@+id/errorUsername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:textColor="@color/red"
+                android:visibility="gone" />
+
             <EditText
                 android:id="@+id/editTextPassword"
                 android:layout_width="match_parent"
@@ -57,6 +65,14 @@
                 android:hint="@string/password"
                 android:inputType="textPassword"
                 android:padding="8dp" />
+
+            <TextView
+                android:id="@+id/errorPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:textColor="@color/red"
+                android:visibility="gone" />
 
 
             <EditText
@@ -69,6 +85,14 @@
                 android:inputType="textPassword"
                 android:padding="8dp" />
 
+            <TextView
+                android:id="@+id/errorConfirmPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:textColor="@color/red"
+                android:visibility="gone" />
+
 
             <EditText
                 android:id="@+id/editTextDisplayName"
@@ -78,6 +102,16 @@
                 android:background="@drawable/edit_box"
                 android:hint="@string/d_name"
                 android:padding="8dp" />
+
+            <TextView
+                android:id="@+id/errorDisplayName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:textColor="@color/red"
+                android:visibility="gone" />
+
+
 
             <RelativeLayout
                 android:layout_width="match_parent"
