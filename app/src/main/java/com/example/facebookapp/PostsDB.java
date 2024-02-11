@@ -90,7 +90,7 @@ public class PostsDB {
        Post editedPost = new Post(post.getAuthorName(), post.getAuthorPfp(), post.getPostTime(),
                post.getLikes(), post.getShares(), post.getPostId(), post.getComments(),
                content, img, true, post.getAuthorId());
-       posts.add(post);
+       posts.add(editedPost);
    }
 
    public void deletePost(Post post) {

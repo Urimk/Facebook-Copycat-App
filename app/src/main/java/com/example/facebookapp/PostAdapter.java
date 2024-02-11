@@ -18,14 +18,18 @@ import java.util.List;
 
 public class PostAdapter extends BaseAdapter {
 
-    private List<FeedActivity.PostItem> postList;
+    private List<Post> postList;
     private LayoutInflater inflater;
     private Context context;
+    private User currentUser;
+    private DB database; // Add a reference to the database
 
-    public PostAdapter(Context context, List<FeedActivity.PostItem> postList) {
+    public PostAdapter(Context context, List<Post> postList, User currentUser, DB database) {
         this.context = context;
         this.postList = postList;
+        this.currentUser = currentUser;
         this.inflater = LayoutInflater.from(context);
+        this.database = database; // Initialize the reference to the database
     }
 
     @Override
@@ -50,8 +54,8 @@ public class PostAdapter extends BaseAdapter {
             view = inflater.inflate(R.layout.post_item, null);
         }
 
-        // Get the current post item
-        FeedActivity.PostItem currentPost = (FeedActivity.PostItem) getItem(position);
+        // Get the current post
+        Post currentPost = (Post) getItem(position);
 
         // Populate the views with post details
         TextView postContentTextView = view.findViewById(R.id.postContentTextView);
@@ -69,9 +73,10 @@ public class PostAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 // Remove the current post from the list
-                postList.remove(position);
+                database.getPostsDB().deletePost(currentPost);
 
                 // Update the adapter to reflect the changes
+                postList.remove(position);
                 notifyDataSetChanged();
             }
         });
@@ -86,7 +91,7 @@ public class PostAdapter extends BaseAdapter {
             }
         });
 
-        postContentTextView.setText(currentPost.getText());
+        postContentTextView.setText(currentPost.getContent());
 
         // Set click listener for the Comment button
         commentButton.setOnClickListener(new View.OnClickListener() {
@@ -107,7 +112,7 @@ public class PostAdapter extends BaseAdapter {
             }
         });
 
-        CommentAdapter commentAdapter = new CommentAdapter(context, currentPost.getComments());
+        CommentAdapter commentAdapter = new CommentAdapter(context, currentPost.getComments(), database);
         ListView commentListView = view.findViewById(R.id.commentListView);
         commentListView.setAdapter(commentAdapter);
 
@@ -115,13 +120,16 @@ public class PostAdapter extends BaseAdapter {
         postButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Extract the comment from the EditText
                 String commentText = commentEditText.getText().toString();
 
                 // Check if the comment is not empty
                 if (!commentText.isEmpty()) {
-                    // Add the comment to the current post item
-                    currentPost.addComment(commentText, "User", "Just now");
+                    // Add the comment to the current post using the current user's data
+                    Comment newComment = new Comment(currentUser.getUserId(), new Time(), false, commentText,
+                            currentUser.getUserName(), currentUser.getUserPfp(), 1);
+
+                    // Update the post in the database with the new comment
+                    database.getPostsDB().getPostById(currentPost.getPostId()).addComment(currentUser, newComment.getContent());
 
                     // Update the CommentAdapter to reflect the new comment
                     commentAdapter.notifyDataSetChanged();
@@ -139,13 +147,13 @@ public class PostAdapter extends BaseAdapter {
     }
 
     // Method to show a dialog for post editing
-    private void showEditDialog(FeedActivity.PostItem postItem, int position) {
+    private void showEditDialog(Post post, int position) {
         // Create a dialog with an EditText for post editing
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Edit Post");
 
         final EditText editPostEditText = new EditText(context);
-        editPostEditText.setText(postItem.getText());
+        editPostEditText.setText(post.getContent());
         builder.setView(editPostEditText);
 
         builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
@@ -154,7 +162,8 @@ public class PostAdapter extends BaseAdapter {
                 // Update the post content and notify the adapter if the text is not empty
                 String updatedPostText = editPostEditText.getText().toString().trim();
                 if (!updatedPostText.isEmpty()) {
-                    postItem.setText(updatedPostText);
+                    post.setContent(updatedPostText);
+                    database.getPostsDB().editPost(post, updatedPostText, ""); // Update post in the database
                     notifyDataSetChanged();
                 } else {
                     // Show a toast message or take appropriate action for empty post
@@ -173,11 +182,12 @@ public class PostAdapter extends BaseAdapter {
         builder.show();
     }
 
-    private String buildCommentsText(List<FeedActivity.CommentItem> comments) {
+    private String buildCommentsText(List<Comment> comments) {
         StringBuilder commentsText = new StringBuilder();
-        for (FeedActivity.CommentItem comment : comments) {
-            commentsText.append(comment.getCommentText()).append("\n");
+        for (Comment comment : comments) {
+            commentsText.append(comment.getContent()).append("\n");
         }
         return commentsText.toString().trim();
     }
 }
+

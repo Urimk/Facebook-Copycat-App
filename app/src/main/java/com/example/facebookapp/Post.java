@@ -15,6 +15,9 @@ public class Post {
     private List<Comment> comments;
     private boolean edited;
 
+    private static int commentIdCounter = 0;
+
+
     public Post(String authorName, String authorPfp, Time postTime, int likes, int shares,
                 int postId, List<Comment> comments, String content, String img, boolean edited,
                 int authorId) {
@@ -99,6 +102,8 @@ public class Post {
         return content;
     }
 
+    public void setContent(String content) { this.content = content; }
+
     public String getAuthorPfp() {
         return authorPfp;
     }
@@ -115,10 +120,15 @@ public class Post {
         return new ArrayList<>(this.comments);
     }
 
+    public void addComment(User user, String commentText) {
+        int newCommentId = commentIdCounter++; // Increment the counter to get a unique comment ID
+        Comment newComment = new Comment(user.getUserId(), new Time(), false, commentText, user.getUserNick(), user.getUserPfp(), newCommentId);
+        comments.add(newComment);
+    }
+
     public int getAuthorId() {
         return authorId;
     }
-
     public boolean isEdited() {
         return edited;
     }

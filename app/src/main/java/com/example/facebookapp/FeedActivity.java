@@ -20,12 +20,20 @@ public class FeedActivity extends AppCompatActivity {
     private Button postButton;
     private ListView postsListView;
 
-    private List<PostItem> postList = new ArrayList<>();
+    private List<Post> postList = new ArrayList<>();
+    private User currentUser;  // Sample session user
+    private DB database; // Reference to the database
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
+
+        // Initialize the sample session user
+        currentUser = new User("SampleUser", "SampleUserPFP", "UserNick", 123, "samplePassword");
+
+        // Initialize the database
+        database = new DB(this);
 
         // Initialize UI components
         postEditText = findViewById(R.id.postEditText);
@@ -37,17 +45,19 @@ public class FeedActivity extends AppCompatActivity {
         postButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Create a new PostItem with the entered text
-                String postText = postEditText.getText().toString().trim(); // Trim leading and trailing whitespaces
+                String postText = postEditText.getText().toString().trim();
                 if (!postText.isEmpty()) {
-                    // Only proceed if the post text is not empty
-                    PostItem newPostItem = new PostItem(postText);
+                    // Create a new Post object using the sample session user's data
+                    Post newPost = new Post(currentUser.getUserName(), currentUser.getUserPfp(), postText, "", currentUser.getUserId());
 
                     // Add the new post to the list
-                    postList.add(newPostItem);
+                    postList.add(newPost);
 
                     // Update the ListView
                     ((PostAdapter) postsListView.getAdapter()).notifyDataSetChanged();
+
+                    // Update the posts in the database
+                    database.getPostsDB().addPost(newPost);
 
                     // Clear the EditText after posting
                     postEditText.getText().clear();
@@ -59,67 +69,7 @@ public class FeedActivity extends AppCompatActivity {
         });
 
         // Set up the ListView with the PostAdapter
-        PostAdapter adapter = new PostAdapter(this, postList);
+        PostAdapter adapter = new PostAdapter(this, postList, currentUser, database);
         postsListView.setAdapter(adapter);
-    }
-
-
-    // Inside FeedActivity.java
-    public static class CommentItem {
-        private String commentText;
-        private String displayName;
-        private String date;
-
-        public CommentItem(String commentText, String displayName, String date) {
-            this.commentText = commentText;
-            this.displayName = displayName;
-            this.date = date;
-        }
-
-        public String getCommentText() {
-            return commentText;
-        }
-
-        public void setCommentText(String text) {
-            this.commentText = text;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
-
-        public String getDate() {
-            return date;
-        }
-    }
-
-
-
-    // Define a data class for a PostItem
-    public static class PostItem {
-        private String text;
-        private List<CommentItem> comments;
-
-        public PostItem(String text) {
-            this.text = text;
-            this.comments = new ArrayList<>();
-        }
-
-        public String getText() {
-            return text;
-        }
-
-        public void setText(String text) {
-            this.text = text;
-        }
-
-        public List<CommentItem> getComments() {
-            return comments;
-        }
-
-        public void addComment(String commentText, String displayName, String date) {
-            CommentItem commentItem = new CommentItem(commentText, displayName, date);
-            comments.add(commentItem);
-        }
     }
 }
