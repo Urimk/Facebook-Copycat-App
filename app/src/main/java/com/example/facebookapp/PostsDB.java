@@ -104,11 +104,11 @@ public class PostsDB {
        this.posts.remove(i);
    }
 
-   public void incLikes(Post post) {
+   public void incLikes(Post post, int amount) {
        // increase likes on a post
        // construct a new post because posts are immutable
        Post incLikePost = new Post(post.getAuthorName(), post.getAuthorPfp(), post.getPostTime(),
-               post.getLikes() + 1, post.getShares(), post.getPostId(), post.getComments(),
+               post.getLikes() + amount, post.getShares(), post.getPostId(), post.getComments(),
                post.getContent(), post.getImg(), post.isEdited(), post.getAuthorId());
 
        int i = 0;

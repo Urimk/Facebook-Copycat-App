@@ -3,6 +3,7 @@ package com.example.facebookapp;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.util.List;
 
@@ -66,10 +68,12 @@ public class PostAdapter extends BaseAdapter {
 
         // Populate the views with post details
         TextView postContentTextView = view.findViewById(R.id.postContentTextView);
-        Button likeButton = view.findViewById(R.id.likeButton);
+        ToggleButton likeButton = view.findViewById(R.id.likeButton);
         Button commentButton = view.findViewById(R.id.commentButton);
         Button postButton = view.findViewById(R.id.postButton);
         EditText commentEditText = view.findViewById(R.id.commentEditText);
+        Button shareButton = view.findViewById(R.id.shareButton);
+
 
         // Add click listener to the delete icon
         ImageView deleteIcon = view.findViewById(R.id.deleteIcon);
@@ -115,6 +119,33 @@ public class PostAdapter extends BaseAdapter {
             }
         });
 
+        // Set click listener for the Like button
+        likeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Check if the post is liked or not
+                if (!likeButton.isChecked()) {
+                    // If not liked, increase the like count by 1
+                    currentPost.incLikes();
+                    likeButton.setText("Liked");
+                    database.getPostsDB().incLikes(currentPost, 1);
+                } else {
+                    // If already liked, decrease the like count by 1
+                    currentPost.decLikes();
+                    likeButton.setText("Like");
+                    database.getPostsDB().incLikes(currentPost, -1);
+                }
+            }
+        });
+
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                shareContent();
+            }
+        });
+
+
         CommentAdapter commentAdapter = new CommentAdapter(context, currentPost.getComments(), database, currentPost);
         ListView commentListView = view.findViewById(R.id.commentListView);
         commentListView.setAdapter(commentAdapter);
@@ -147,6 +178,18 @@ public class PostAdapter extends BaseAdapter {
         });
 
         return view;
+    }
+
+    private void shareContent() {
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, "Share post");
+
+        Intent chooser = Intent.createChooser(shareIntent, "Share via");
+        if (context.getPackageManager() != null) {
+            context.startActivity(chooser);
+        }
     }
 
     // Method to show a dialog for post editing

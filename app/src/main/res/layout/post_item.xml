@@ -86,12 +86,18 @@
         android:layout_below="@id/dateTextView"
         android:layout_marginTop="8dp">
 
-        <Button
+        <ToggleButton
             android:id="@+id/likeButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Like"/>
+            android:textOn="Liked"
+            android:textOff="Like"
+            android:drawableLeft="@drawable/like_icon"
+            android:drawablePadding="8dp"
+            android:textSize="14sp"
+            android:gravity="center"/>
+
 
         <Button
             android:id="@+id/shareButton"

@@ -108,6 +108,10 @@ public class Post {
         return authorPfp;
     }
 
+    public void incLikes() { likes++; }
+
+    public void decLikes() { likes--; }
+
     public String getImg() {
         return img;
     }
