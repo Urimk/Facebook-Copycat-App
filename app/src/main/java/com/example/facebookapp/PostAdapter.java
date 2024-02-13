@@ -146,9 +146,16 @@ public class PostAdapter extends BaseAdapter {
         });
 
 
-        CommentAdapter commentAdapter = new CommentAdapter(context, currentPost.getComments(), database, currentPost);
+        CommentAdapter commentAdapter;
         ListView commentListView = view.findViewById(R.id.commentListView);
-        commentListView.setAdapter(commentAdapter);
+        if (convertView == null) {
+            commentAdapter = new CommentAdapter(context, currentPost.getComments(), database, currentPost);
+            commentListView.setAdapter(commentAdapter);
+        } else {
+            // Use the existing commentAdapter
+            commentAdapter = (CommentAdapter) commentListView.getAdapter();
+        }
+
 
         // Set click listener for the Post button
         postButton.setOnClickListener(new View.OnClickListener() {

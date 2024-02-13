@@ -1,6 +1,7 @@
 package com.example.facebookapp;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,14 +32,22 @@ public class CommentAdapter extends BaseAdapter {
     }
 
     public void updateComments(List<Comment> newComments) {
+        // Log before updating comments
+        Log.d("CommentAdapter", "Updating comments: " + commentList.size() + " comments before update. Address: " + System.identityHashCode(commentList));
+
         commentList.clear();
         commentList.addAll(newComments);
         notifyDataSetChanged();
+
+        // Log after updating comments
+        Log.d("CommentAdapter", "Updated comments: " + commentList.size() + " comments after update. Address: " + System.identityHashCode(commentList));
     }
 
     @Override
     public int getCount() {
-        return commentList.size();
+        int size = commentList.size();
+        Log.d("CommentAdapter", "Getting comments count: " + size + " comments. Address: " + System.identityHashCode(commentList));
+        return size;
     }
 
     @Override
@@ -56,6 +65,7 @@ public class CommentAdapter extends BaseAdapter {
         View view = convertView;
         if (view == null) {
             view = inflater.inflate(R.layout.comment_item, null);
+            Log.d("CommentAdapter", "Inflating new view. Address: " + System.identityHashCode(commentList));
         }
 
         // Get the current comment
@@ -76,6 +86,9 @@ public class CommentAdapter extends BaseAdapter {
         deleteIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Log the size before updating the adapter
+                Log.d("CommentAdapter", "Deleting comment: " + commentList.size() + " comments before deletion.");
+
                 // Remove the current comment from the database
                 database.getPostsDB().removeComment(associatedPost, currentComment);
 
@@ -101,6 +114,9 @@ public class CommentAdapter extends BaseAdapter {
 
     // Method to show a dialog for comment editing
     private void showEditDialog(Comment comment) {
+        // Log the entry of the showEditDialog method
+        Log.d("CommentAdapter", "Entering showEditDialog");
+
         // Create a dialog with an EditText for comment editing
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Edit Comment");
@@ -137,4 +153,3 @@ public class CommentAdapter extends BaseAdapter {
         builder.show();
     }
 }
-
