@@ -64,8 +64,11 @@ public class FeedActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String postText = postEditText.getText().toString().trim();
                 if (!postText.isEmpty()) {
+                    // Get the image URI if available
+                    String imageUriString = (selectedImageUri != null) ? selectedImageUri.toString() : "";
+
                     // Create a new Post object using the sample session user's data
-                    Post newPost = new Post(currentUser.getUserName(), currentUser.getUserPfp(), postText, selectedImageUri.toString(), currentUser.getUserId());
+                    Post newPost = new Post(currentUser.getUserName(), currentUser.getUserPfp(), postText, imageUriString, currentUser.getUserId());
 
                     // Update the posts in the database
                     database.getPostsDB().addPost(newPost);
@@ -76,8 +79,9 @@ public class FeedActivity extends AppCompatActivity {
                     // Update the ListView with the retrieved posts
                     ((PostAdapter) postsListView.getAdapter()).updatePosts(allPosts);
 
-                    // Clear the EditText after posting
+                    // Clear the EditText and reset the selectedImageUri after posting
                     postEditText.getText().clear();
+                    selectedImageUri = null;
                 } else {
                     // Show a toast message or take appropriate action for empty post
                     Toast.makeText(FeedActivity.this, "Post cannot be empty", Toast.LENGTH_SHORT).show();

@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -74,6 +75,20 @@ public class PostAdapter extends BaseAdapter {
         EditText commentEditText = view.findViewById(R.id.commentEditText);
         Button shareButton = view.findViewById(R.id.shareButton);
 
+        postContentTextView.setText(currentPost.getContent());
+
+        // Display the post image if available
+        ImageView postImageView = view.findViewById(R.id.postImageView);
+        String imageString = currentPost.getImg();
+        Uri imageUri = Uri.parse(imageString);
+        if (!imageString.isEmpty()) {
+            postImageView.setVisibility(View.VISIBLE);
+            postImageView.setImageURI(imageUri);
+            Log.d("ImageUriDebug", "ImageUri: " + imageUri.toString());
+
+        } else {
+            postImageView.setVisibility(View.GONE);
+        }
 
         // Add click listener to the delete icon
         ImageView deleteIcon = view.findViewById(R.id.deleteIcon);
