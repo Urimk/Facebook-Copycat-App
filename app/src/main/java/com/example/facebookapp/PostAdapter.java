@@ -90,6 +90,17 @@ public class PostAdapter extends BaseAdapter {
             postImageView.setVisibility(View.GONE);
         }
 
+        ImageView profileImageView = view.findViewById(R.id.profileImageView);
+        String userProfilePicString = currentPost.getAuthorPfp();
+        Uri userProfilePicUri = Uri.parse(userProfilePicString);
+        if (!userProfilePicString.isEmpty()) {
+            profileImageView.setImageURI(userProfilePicUri);
+            Log.d("UserProfilePicDebug", "UserProfilePicUri: " + userProfilePicUri.toString());
+        } else {
+            // Set a default profile picture if the user's profile picture is empty
+            profileImageView.setImageResource(R.drawable.default_profile_pic);
+        }
+
         // Add click listener to the delete icon
         ImageView deleteIcon = view.findViewById(R.id.deleteIcon);
         deleteIcon.setOnClickListener(new View.OnClickListener() {

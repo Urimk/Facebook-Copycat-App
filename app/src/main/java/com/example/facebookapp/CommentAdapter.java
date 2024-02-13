@@ -1,6 +1,7 @@
 package com.example.facebookapp;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,6 +82,17 @@ public class CommentAdapter extends BaseAdapter {
         commentTextView.setText(currentComment.getContent());
         displayNameTextView.setText(currentComment.getAuthorName());
         dateTextView.setText(currentComment.getPostTime().toString()); // Use appropriate method to get the date
+
+        ImageView profileImageView = view.findViewById(R.id.profileImageView);
+        String userProfilePicString = associatedPost.getAuthorPfp();
+        Uri userProfilePicUri = Uri.parse(userProfilePicString);
+        if (!userProfilePicString.isEmpty()) {
+            profileImageView.setImageURI(userProfilePicUri);
+            Log.d("UserProfilePicDebug", "UserProfilePicUri: " + userProfilePicUri.toString());
+        } else {
+            // Set a default profile picture if the user's profile picture is empty
+            profileImageView.setImageResource(R.drawable.default_profile_pic);
+        }
 
         // Add click listener to the delete icon
         deleteIcon.setOnClickListener(new View.OnClickListener() {
