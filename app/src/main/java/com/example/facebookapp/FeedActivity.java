@@ -5,11 +5,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -39,7 +42,7 @@ public class FeedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_feed);
 
         // Initialize the sample session user
-        currentUser = new User("SampleUser", "SampleUserPFP", "UserNick", 123, "samplePassword");
+        currentUser = new User("SampleUser", "", "UserNick", 123, "samplePassword");
 
         // Initialize the database
         database = new DB(this);
@@ -49,6 +52,25 @@ public class FeedActivity extends AppCompatActivity {
         imageUploadButton = findViewById(R.id.imageUploadButton);
         postButton = findViewById(R.id.postButton);
         postsListView = findViewById(R.id.postsListView);
+        TextView usernameTextView = findViewById(R.id.usernameTextView);
+
+        if (currentUser.getUserName() != null) {
+            usernameTextView.setText(currentUser.getUserNick());
+        }
+
+        // Inside FeedActivity, after initializing UI components
+        ImageView profileImageView = findViewById(R.id.profileImageView);
+
+        // Set the profile image URI if available
+        String profileImageUriString = currentUser.getUserPfp();
+        if (!profileImageUriString.isEmpty()) {
+            Uri profileImageUri = Uri.parse(profileImageUriString);
+            profileImageView.setImageURI(profileImageUri);
+
+        } else {
+            // Set a default image or handle the case when there is no profile image
+            profileImageView.setImageResource(R.drawable.default_profile_pic);
+        }
 
         // Set click listener for the Image Upload button
         imageUploadButton.setOnClickListener(new View.OnClickListener() {

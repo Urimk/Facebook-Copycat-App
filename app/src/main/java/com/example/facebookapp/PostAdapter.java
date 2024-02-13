@@ -74,6 +74,11 @@ public class PostAdapter extends BaseAdapter {
         Button postButton = view.findViewById(R.id.postButton);
         EditText commentEditText = view.findViewById(R.id.commentEditText);
         Button shareButton = view.findViewById(R.id.shareButton);
+        TextView postUserName = view.findViewById(R.id.displayNameTextView);
+
+        if (currentUser.getUserName() != null) {
+            postUserName.setText(currentUser.getUserNick());
+        }
 
         postContentTextView.setText(currentPost.getContent());
 

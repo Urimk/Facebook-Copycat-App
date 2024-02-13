@@ -79,6 +79,7 @@ public class CommentAdapter extends BaseAdapter {
         ImageView deleteIcon = view.findViewById(R.id.deleteIcon);
         ImageView editIcon = view.findViewById(R.id.editIcon);
 
+
         commentTextView.setText(currentComment.getContent());
         displayNameTextView.setText(currentComment.getAuthorName());
         dateTextView.setText(currentComment.getPostTime().toString()); // Use appropriate method to get the date
