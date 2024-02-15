@@ -1,5 +1,7 @@
 package com.example.facebookapp;
 
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -23,6 +25,7 @@ import java.util.List;
 
 public class FeedActivity extends AppCompatActivity {
 
+    private final int PICK_IMAGE_REQUEST = 1;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_PICKER = 2;
 
@@ -32,20 +35,24 @@ public class FeedActivity extends AppCompatActivity {
     private ListView postsListView;
 
     private User currentUser;  // Sample session user
-    private DB database; // Reference to the database
 
     private Uri selectedImageUri;  // Use Uri instead of Bitmap
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_feed);
 
-        // Initialize the sample session user
-        currentUser = new User("SampleUser", "", "UserNick", 123, "samplePassword");
+        Intent intent = getIntent();
+        if (intent != null) {
+            String username = intent.getStringExtra("username");
+            currentUser = DB.getUsersDB().getUserByUserName(username);
+            setContentView(R.layout.activity_feed);
+        }
+        else {
+            setContentView(R.layout.unauthorized_feed);
+            return;
+        }
 
-        // Initialize the database
-        database = new DB(this);
 
         // Initialize UI components
         postEditText = findViewById(R.id.postEditText);
@@ -53,6 +60,13 @@ public class FeedActivity extends AppCompatActivity {
         postButton = findViewById(R.id.postButton);
         postsListView = findViewById(R.id.postsListView);
         TextView usernameTextView = findViewById(R.id.usernameTextView);
+        Button logoutButton = findViewById(R.id.logoutButton);
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
         if (currentUser.getUserName() != null) {
             usernameTextView.setText(currentUser.getUserNick());
@@ -65,6 +79,7 @@ public class FeedActivity extends AppCompatActivity {
         String profileImageUriString = currentUser.getUserPfp();
         if (!profileImageUriString.isEmpty()) {
             Uri profileImageUri = Uri.parse(profileImageUriString);
+
             profileImageView.setImageURI(profileImageUri);
 
         } else {
@@ -93,10 +108,10 @@ public class FeedActivity extends AppCompatActivity {
                     Post newPost = new Post(currentUser.getUserName(), currentUser.getUserPfp(), postText, imageUriString, currentUser.getUserId());
 
                     // Update the posts in the database
-                    database.getPostsDB().addPost(newPost);
+                    DB.getPostsDB().addPost(newPost);
 
                     // Retrieve all posts from the database
-                    List<Post> allPosts = database.getPostsDB().getAllPosts();
+                    List<Post> allPosts = DB.getPostsDB().getAllPosts();
 
                     // Update the ListView with the retrieved posts
                     ((PostAdapter) postsListView.getAdapter()).updatePosts(allPosts);
@@ -112,62 +127,33 @@ public class FeedActivity extends AppCompatActivity {
         });
 
         // Set up the ListView with the PostAdapter
-        PostAdapter adapter = new PostAdapter(this, new ArrayList<>(), currentUser, database);
+        PostAdapter adapter = new PostAdapter(this, new ArrayList<>(), currentUser);
         postsListView.setAdapter(adapter);
 
         // Retrieve all posts from the database
-        List<Post> allPosts = database.getPostsDB().getAllPosts();
+        List<Post> allPosts = DB.getPostsDB().getAllPosts();
 
         // Update the ListView with the retrieved posts
         adapter.updatePosts(allPosts);
-    }
-
-    private void dispatchImagePickerIntent() {
-        Intent pickPhoto = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(pickPhoto, REQUEST_IMAGE_PICKER);
-    }
-
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        }
+        adapter.notifyDataSetChanged();
     }
 
     private void showImageSourceDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Choose Image Source");
-        builder.setItems(new CharSequence[]{"Take a Photo", "Upload from Gallery"}, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case 0:
-                        dispatchTakePictureIntent();
-                        break;
-                    case 1:
-                        dispatchImagePickerIntent();
-                        break;
-                }
-            }
-        });
-        builder.show();
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("image/*");
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == RESULT_OK) {
-            if (requestCode == REQUEST_IMAGE_PICKER && data != null) {
-                // Handle image selected from gallery
+        if(requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
                 selectedImageUri = data.getData();
-                // You can use the selectedImageUri as needed (e.g., display in ImageView)
-                Toast.makeText(this, "Image selected from gallery", Toast.LENGTH_SHORT).show();
-            } else if (requestCode == REQUEST_IMAGE_CAPTURE && data != null) {
-                // Handle image captured from camera
-                selectedImageUri = data.getData();
-                // You can use the selectedImageUri as needed (e.g., display in ImageView)
-                Toast.makeText(this, "Image captured from camera", Toast.LENGTH_SHORT).show();
+                ContentResolver resolver = this.getContentResolver();
+                resolver.takePersistableUriPermission(selectedImageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                Toast.makeText(this, "Image selected", Toast.LENGTH_SHORT).show();
             }
         }
     }

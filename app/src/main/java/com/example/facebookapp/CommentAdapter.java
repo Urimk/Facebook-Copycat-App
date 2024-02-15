@@ -21,7 +21,6 @@ public class CommentAdapter extends BaseAdapter {
     private List<Comment> commentList;
     private LayoutInflater inflater;
     private Context context;
-    private DB database; // Reference to the database
     private Post associatedPost; // Reference to the associated Post
     private CommentChangeListener commentChangeListener;
     private TextView commentCountTextView;
@@ -29,11 +28,10 @@ public class CommentAdapter extends BaseAdapter {
 
 
 
-    public CommentAdapter(Context context, List<Comment> commentList, DB database, Post associatedPost, TextView commentCountTextView) {
+    public CommentAdapter(Context context, List<Comment> commentList, Post associatedPost, TextView commentCountTextView) {
         this.context = context;
         this.commentList = commentList;
         this.inflater = LayoutInflater.from(context);
-        this.database = database; // Initialize the reference to the database
         this.commentCountTextView = commentCountTextView;
         this.associatedPost = associatedPost; // Initialize the reference to the associated Post
     }
@@ -110,7 +108,7 @@ public class CommentAdapter extends BaseAdapter {
         dateTextView.setText(currentComment.getPostTime().toString()); // Use appropriate method to get the date
 
         ImageView profileImageView = view.findViewById(R.id.profileImageView);
-        String userProfilePicString = associatedPost.getAuthorPfp();
+        String userProfilePicString = currentComment.getAuthorPfp();
         Uri userProfilePicUri = Uri.parse(userProfilePicString);
         if (!userProfilePicString.isEmpty()) {
             profileImageView.setImageURI(userProfilePicUri);
@@ -128,10 +126,10 @@ public class CommentAdapter extends BaseAdapter {
                 Log.d("CommentAdapter", "Deleting comment: " + commentList.size() + " comments before deletion.");
 
                 // Remove the current comment from the database
-                database.getPostsDB().removeComment(associatedPost, currentComment);
+                DB.getPostsDB().removeComment(associatedPost, currentComment);
 
                 // Update the adapter to reflect the changes
-                updateComments(database.getPostsDB().getPostById(associatedPost.getPostId()).getComments());
+                updateComments(DB.getPostsDB().getPostById(associatedPost.getPostId()).getComments());
 
                 // Optionally, you can show a toast message or perform other actions
                 Toast.makeText(context, "Comment deleted", Toast.LENGTH_SHORT).show();
@@ -173,7 +171,7 @@ public class CommentAdapter extends BaseAdapter {
                     notifyDataSetChanged();
 
                     // Update the database to reflect the comment edit
-                    database.getPostsDB().editComment(associatedPost, comment);
+                    DB.getPostsDB().editComment(associatedPost, comment);
                 } else {
                     // Show a toast message or take appropriate action for empty comment
                     Toast.makeText(context, "Comment cannot be empty", Toast.LENGTH_SHORT).show();

@@ -10,6 +10,7 @@
     <string name="login">Login to Facebook</string>
     <string name="login_btn">Login</string>
     <string name="incorrect_info">Incorrect username or password</string>
+    <string name="unauthorized_access_to_feed">UNAUTHORIZED ACCESS TO FEED!</string>
 
 
 </resources>

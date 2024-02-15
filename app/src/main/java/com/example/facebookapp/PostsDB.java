@@ -13,7 +13,7 @@ import java.util.Scanner;
 
 public class PostsDB {
     private List<Post> posts;
-    private int nextNewPostId;
+    private int nextNewPostId = 20;
 
    public PostsDB(int resourceId, Context context){
        this.posts = new ArrayList<>();
@@ -32,7 +32,7 @@ public class PostsDB {
        }
        if (jsonObject == null) {
            // no file found
-           this.nextNewPostId = 0;
+           this.nextNewPostId = 20;
            return;
        }
        try {

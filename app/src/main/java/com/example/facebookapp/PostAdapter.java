@@ -27,14 +27,12 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
     private LayoutInflater inflater;
     private Context context;
     private User currentUser;
-    private DB database; // Reference to the database
 
-    public PostAdapter(Context context, List<Post> postList, User currentUser, DB database) {
+    public PostAdapter(Context context, List<Post> postList, User currentUser) {
         this.context = context;
         this.postList = postList;
         this.currentUser = currentUser;
         this.inflater = LayoutInflater.from(context);
-        this.database = database; // Initialize the reference to the database
     }
 
     public void updatePosts(List<Post> newPosts) {
@@ -78,9 +76,10 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
         TextView postUserName = view.findViewById(R.id.displayNameTextView);
         TextView likeCountTextView = view.findViewById(R.id.likeCount);
         TextView commentCountTextView = view.findViewById(R.id.commentCount);
+        TextView dateTextView = view.findViewById(R.id.dateTextView);
 
-        if (currentUser.getUserName() != null) {
-            postUserName.setText(currentUser.getUserNick());
+        if (currentPost.getAuthorName() != null) {
+            postUserName.setText(currentPost.getAuthorName());
         }
 
         int likeCount = currentPost.getLikes();
@@ -90,6 +89,7 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
         commentCountTextView.setText(String.valueOf(commentCount));
 
         postContentTextView.setText(currentPost.getContent());
+        dateTextView.setText(currentPost.getPostTime().toString());
 
         // Display the post image if available
         ImageView postImageView = view.findViewById(R.id.postImageView);
@@ -98,7 +98,6 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
         if (!imageString.isEmpty()) {
             postImageView.setVisibility(View.VISIBLE);
             postImageView.setImageURI(imageUri);
-            Log.d("ImageUriDebug", "ImageUri: " + imageUri.toString());
 
         } else {
             postImageView.setVisibility(View.GONE);
@@ -121,10 +120,10 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
             @Override
             public void onClick(View v) {
                 // Remove the current post from the database
-                database.getPostsDB().deletePost(currentPost);
+                DB.getPostsDB().deletePost(currentPost);
 
                 // Update the adapter to reflect the changes
-                updatePosts(database.getPostsDB().getAllPosts());
+                updatePosts(DB.getPostsDB().getAllPosts());
             }
         });
 
@@ -167,14 +166,14 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
                 if (!likeButton.isSelected()) {
                     // If not liked, increase the like count by 1
                     currentPost.incLikes();
-                    database.getPostsDB().incLikes(currentPost, 1);
+                    DB.getPostsDB().incLikes(currentPost, 1);
 
                     // Set the Liked_icon when the button is pressed
                     likeButton.setImageResource(R.drawable.liked_icon);
                 } else {
                     // If already liked, decrease the like count by 1
                     currentPost.decLikes();
-                    database.getPostsDB().incLikes(currentPost, -1);
+                    DB.getPostsDB().incLikes(currentPost, -1);
 
                     // Set the original icon when the button is released
                     likeButton.setImageResource(R.drawable.like_icon);
@@ -201,7 +200,7 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
         CommentAdapter commentAdapter;
         ListView commentListView = view.findViewById(R.id.commentListView);
         if (convertView == null) {
-            commentAdapter = new CommentAdapter(context, currentPost.getComments(), database, currentPost, commentCountTextView);
+            commentAdapter = new CommentAdapter(context, currentPost.getComments(), currentPost, commentCountTextView);
             commentAdapter.setCommentChangeListener(this);
             commentListView.setAdapter(commentAdapter);
         } else {
@@ -223,10 +222,10 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
                             currentUser.getUserName(), currentUser.getUserPfp(), 1);
 
                     // Update the post in the database with the new comment
-                    database.getPostsDB().getPostById(currentPost.getPostId()).addComment(currentUser, newComment.getContent());
+                    DB.getPostsDB().getPostById(currentPost.getPostId()).addComment(currentUser, newComment.getContent());
 
                     // Update the CommentAdapter to reflect the new comment
-                    commentAdapter.updateComments(database.getPostsDB().getPostById(currentPost.getPostId()).getComments());
+                    commentAdapter.updateComments(DB.getPostsDB().getPostById(currentPost.getPostId()).getComments());
 
                     // Clear the EditText after posting
                     commentEditText.getText().clear();
@@ -277,8 +276,8 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
 
                 if (!updatedPostText.isEmpty()) {
                     post.setContent(updatedPostText);
-                    database.getPostsDB().editPost(post, updatedPostText, ""); // Update post in the database
-                    updatePosts(database.getPostsDB().getAllPosts());
+                    DB.getPostsDB().editPost(post, updatedPostText, ""); // Update post in the database
+                    updatePosts(DB.getPostsDB().getAllPosts());
                 } else {
                     // Show a toast message or take appropriate action for empty post
                     Toast.makeText(context, "Post cannot be empty", Toast.LENGTH_SHORT).show();
