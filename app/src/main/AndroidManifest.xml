@@ -13,15 +13,6 @@ xmlns:tools="http://schemas.android.com/tools">
     android:theme="@style/Theme.FacebookApp"
     tools:targetApi="31">
 
-        <activity
-            android:name=".FeedActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
 
     <activity android:name=".RegisterActivity"/>
     <activity android:name=".FeedActivity"/>
