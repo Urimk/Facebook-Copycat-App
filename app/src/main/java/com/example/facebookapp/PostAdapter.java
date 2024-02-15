@@ -3,29 +3,44 @@ package com.example.facebookapp;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.util.List;
 
-public class PostAdapter extends BaseAdapter {
+public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentChangeListener {
 
-    private List<FeedActivity.PostItem> postList;
+    private List<Post> postList;
     private LayoutInflater inflater;
     private Context context;
+    private User currentUser;
+    private DB database; // Reference to the database
 
-    public PostAdapter(Context context, List<FeedActivity.PostItem> postList) {
+    public PostAdapter(Context context, List<Post> postList, User currentUser, DB database) {
         this.context = context;
         this.postList = postList;
+        this.currentUser = currentUser;
         this.inflater = LayoutInflater.from(context);
+        this.database = database; // Initialize the reference to the database
+    }
+
+    public void updatePosts(List<Post> newPosts) {
+        postList.clear();
+        postList.addAll(newPosts);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -50,29 +65,66 @@ public class PostAdapter extends BaseAdapter {
             view = inflater.inflate(R.layout.post_item, null);
         }
 
-        // Get the current post item
-        FeedActivity.PostItem currentPost = (FeedActivity.PostItem) getItem(position);
+        // Get the current post
+        Post currentPost = (Post) getItem(position);
 
         // Populate the views with post details
         TextView postContentTextView = view.findViewById(R.id.postContentTextView);
-        ImageView postImageView = view.findViewById(R.id.postImageView);
-        TextView dateTextView = view.findViewById(R.id.dateTextView);
-        Button likeButton = view.findViewById(R.id.likeButton);
-        Button shareButton = view.findViewById(R.id.shareButton);
-        Button commentButton = view.findViewById(R.id.commentButton);
+        ImageButton likeButton = view.findViewById(R.id.likeButton);
+        ImageButton commentButton = view.findViewById(R.id.commentButton);
         Button postButton = view.findViewById(R.id.postButton);
         EditText commentEditText = view.findViewById(R.id.commentEditText);
+        ImageButton shareButton = view.findViewById(R.id.shareButton);
+        TextView postUserName = view.findViewById(R.id.displayNameTextView);
+        TextView likeCountTextView = view.findViewById(R.id.likeCount);
+        TextView commentCountTextView = view.findViewById(R.id.commentCount);
+
+        if (currentUser.getUserName() != null) {
+            postUserName.setText(currentUser.getUserNick());
+        }
+
+        int likeCount = currentPost.getLikes();
+        likeCountTextView.setText(String.valueOf(likeCount));
+
+        int commentCount = currentPost.getComments().size();
+        commentCountTextView.setText(String.valueOf(commentCount));
+
+        postContentTextView.setText(currentPost.getContent());
+
+        // Display the post image if available
+        ImageView postImageView = view.findViewById(R.id.postImageView);
+        String imageString = currentPost.getImg();
+        Uri imageUri = Uri.parse(imageString);
+        if (!imageString.isEmpty()) {
+            postImageView.setVisibility(View.VISIBLE);
+            postImageView.setImageURI(imageUri);
+            Log.d("ImageUriDebug", "ImageUri: " + imageUri.toString());
+
+        } else {
+            postImageView.setVisibility(View.GONE);
+        }
+
+        ImageView profileImageView = view.findViewById(R.id.profileImageView);
+        String userProfilePicString = currentPost.getAuthorPfp();
+        Uri userProfilePicUri = Uri.parse(userProfilePicString);
+        if (!userProfilePicString.isEmpty()) {
+            profileImageView.setImageURI(userProfilePicUri);
+            Log.d("UserProfilePicDebug", "UserProfilePicUri: " + userProfilePicUri.toString());
+        } else {
+            // Set a default profile picture if the user's profile picture is empty
+            profileImageView.setImageResource(R.drawable.default_profile_pic);
+        }
 
         // Add click listener to the delete icon
         ImageView deleteIcon = view.findViewById(R.id.deleteIcon);
         deleteIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Remove the current post from the list
-                postList.remove(position);
+                // Remove the current post from the database
+                database.getPostsDB().deletePost(currentPost);
 
                 // Update the adapter to reflect the changes
-                notifyDataSetChanged();
+                updatePosts(database.getPostsDB().getAllPosts());
             }
         });
 
@@ -82,11 +134,11 @@ public class PostAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 // Provide a way for the user to edit the post content
-                showEditDialog(currentPost, position);
+                showEditDialog(currentPost);
             }
         });
 
-        postContentTextView.setText(currentPost.getText());
+        postContentTextView.setText(currentPost.getContent());
 
         // Set click listener for the Comment button
         commentButton.setOnClickListener(new View.OnClickListener() {
@@ -107,24 +159,74 @@ public class PostAdapter extends BaseAdapter {
             }
         });
 
-        CommentAdapter commentAdapter = new CommentAdapter(context, currentPost.getComments());
+        // Set click listener for the Like button
+        likeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Check if the post is liked or not
+                if (!likeButton.isSelected()) {
+                    // If not liked, increase the like count by 1
+                    currentPost.incLikes();
+                    database.getPostsDB().incLikes(currentPost, 1);
+
+                    // Set the Liked_icon when the button is pressed
+                    likeButton.setImageResource(R.drawable.liked_icon);
+                } else {
+                    // If already liked, decrease the like count by 1
+                    currentPost.decLikes();
+                    database.getPostsDB().incLikes(currentPost, -1);
+
+                    // Set the original icon when the button is released
+                    likeButton.setImageResource(R.drawable.like_icon);
+                }
+
+                // Toggle the selected state of the likeButton
+                likeButton.setSelected(!likeButton.isSelected());
+
+                // Update the TextView with the new like count
+                int newLikeCount = currentPost.getLikes(); // Fetch the updated like count from the post
+                likeCountTextView.setText(String.valueOf(newLikeCount)); // Set the like count to the TextView
+            }
+        });
+
+
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                shareContent();
+            }
+        });
+
+
+        CommentAdapter commentAdapter;
         ListView commentListView = view.findViewById(R.id.commentListView);
-        commentListView.setAdapter(commentAdapter);
+        if (convertView == null) {
+            commentAdapter = new CommentAdapter(context, currentPost.getComments(), database, currentPost, commentCountTextView);
+            commentAdapter.setCommentChangeListener(this);
+            commentListView.setAdapter(commentAdapter);
+        } else {
+            // Use the existing commentAdapter
+            commentAdapter = (CommentAdapter) commentListView.getAdapter();
+        }
+
 
         // Set click listener for the Post button
         postButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Extract the comment from the EditText
                 String commentText = commentEditText.getText().toString();
 
                 // Check if the comment is not empty
                 if (!commentText.isEmpty()) {
-                    // Add the comment to the current post item
-                    currentPost.addComment(commentText, "User", "Just now");
+                    // Add the comment to the current post using the current user's data
+                    Comment newComment = new Comment(currentUser.getUserId(), new Time(), false, commentText,
+                            currentUser.getUserName(), currentUser.getUserPfp(), 1);
+
+                    // Update the post in the database with the new comment
+                    database.getPostsDB().getPostById(currentPost.getPostId()).addComment(currentUser, newComment.getContent());
 
                     // Update the CommentAdapter to reflect the new comment
-                    commentAdapter.notifyDataSetChanged();
+                    commentAdapter.updateComments(database.getPostsDB().getPostById(currentPost.getPostId()).getComments());
 
                     // Clear the EditText after posting
                     commentEditText.getText().clear();
@@ -138,14 +240,33 @@ public class PostAdapter extends BaseAdapter {
         return view;
     }
 
+    public void onCommentChanged(Post associatedPost, TextView commentCountTextView, int newCommentCount) {
+        commentCountTextView.setText(String.valueOf(newCommentCount));
+    }
+
+
+
+
+    private void shareContent() {
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, "Share post");
+
+        Intent chooser = Intent.createChooser(shareIntent, "Share via");
+        if (context.getPackageManager() != null) {
+            context.startActivity(chooser);
+        }
+    }
+
     // Method to show a dialog for post editing
-    private void showEditDialog(FeedActivity.PostItem postItem, int position) {
+    private void showEditDialog(Post post) {
         // Create a dialog with an EditText for post editing
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Edit Post");
 
         final EditText editPostEditText = new EditText(context);
-        editPostEditText.setText(postItem.getText());
+        editPostEditText.setText(post.getContent());
         builder.setView(editPostEditText);
 
         builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
@@ -153,9 +274,11 @@ public class PostAdapter extends BaseAdapter {
             public void onClick(DialogInterface dialog, int which) {
                 // Update the post content and notify the adapter if the text is not empty
                 String updatedPostText = editPostEditText.getText().toString().trim();
+
                 if (!updatedPostText.isEmpty()) {
-                    postItem.setText(updatedPostText);
-                    notifyDataSetChanged();
+                    post.setContent(updatedPostText);
+                    database.getPostsDB().editPost(post, updatedPostText, ""); // Update post in the database
+                    updatePosts(database.getPostsDB().getAllPosts());
                 } else {
                     // Show a toast message or take appropriate action for empty post
                     Toast.makeText(context, "Post cannot be empty", Toast.LENGTH_SHORT).show();
@@ -173,11 +296,5 @@ public class PostAdapter extends BaseAdapter {
         builder.show();
     }
 
-    private String buildCommentsText(List<FeedActivity.CommentItem> comments) {
-        StringBuilder commentsText = new StringBuilder();
-        for (FeedActivity.CommentItem comment : comments) {
-            commentsText.append(comment.getCommentText()).append("\n");
-        }
-        return commentsText.toString().trim();
-    }
 }
+

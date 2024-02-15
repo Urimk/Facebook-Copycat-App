@@ -90,7 +90,7 @@ public class PostsDB {
        Post editedPost = new Post(post.getAuthorName(), post.getAuthorPfp(), post.getPostTime(),
                post.getLikes(), post.getShares(), post.getPostId(), post.getComments(),
                content, img, true, post.getAuthorId());
-       posts.add(post);
+       posts.add(editedPost);
    }
 
    public void deletePost(Post post) {
@@ -104,11 +104,11 @@ public class PostsDB {
        this.posts.remove(i);
    }
 
-   public void incLikes(Post post) {
+   public void incLikes(Post post, int amount) {
        // increase likes on a post
        // construct a new post because posts are immutable
        Post incLikePost = new Post(post.getAuthorName(), post.getAuthorPfp(), post.getPostTime(),
-               post.getLikes() + 1, post.getShares(), post.getPostId(), post.getComments(),
+               post.getLikes() + amount, post.getShares(), post.getPostId(), post.getComments(),
                post.getContent(), post.getImg(), post.isEdited(), post.getAuthorId());
 
        int i = 0;
@@ -121,30 +121,58 @@ public class PostsDB {
        this.posts.add(incLikePost);
    }
 
-   public void removeComment(Post post, Comment comment) {
-       // remove comment from post
-       List<Comment> comments = post.getComments();
-       int i = 0;
-       for (; i < comments.size(); i++) {
-           if (comments.get(i).getCommentId() == comment.getCommentId()) {
-               break;
-           }
-       }
-       // remove the comment with the same id
-       comments.remove(i);
-       Post editedPost = new Post(post.getAuthorName(), post.getAuthorPfp(), post.getPostTime(),
-               post.getLikes(), post.getShares(), post.getPostId(), comments,
-               post.getContent(), post.getImg(), post.isEdited(), post.getAuthorId());
-       i = 0;
-       for (; i < posts.size(); i++) {
-           if (posts.get(i).getPostId() == post.getPostId()) {
-               break;
-           }
-       }
-       posts.remove(i);
-       // edited post doesn't have the comment we wanted to remove
-       posts.add(editedPost);
-   }
+    public void removeComment(Post post, Comment comment) {
+        int postId = post.getPostId();
+
+        // Find the post index
+        int postIndex = -1;
+        for (int i = 0; i < posts.size(); i++) {
+            if (posts.get(i).getPostId() == postId) {
+                postIndex = i;
+                break;
+            }
+        }
+
+        if (postIndex != -1) {
+            // Create a copy of the comments list
+            List<Comment> comments = new ArrayList<>(posts.get(postIndex).getComments());
+
+            // Find the comment index in the copied list
+            int commentIndex = -1;
+            for (int i = 0; i < comments.size(); i++) {
+                if (comments.get(i).getCommentId() == comment.getCommentId()) {
+                    commentIndex = i;
+                    break;
+                }
+            }
+
+            if (commentIndex != -1) {
+                // Remove the comment from the copied list
+                comments.remove(commentIndex);
+
+                // Create a new Post with the modified comments list
+                Post editedPost = new Post(
+                        post.getAuthorName(),
+                        post.getAuthorPfp(),
+                        post.getPostTime(),
+                        post.getLikes(),
+                        post.getShares(),
+                        postId,
+                        comments,
+                        post.getContent(),
+                        post.getImg(),
+                        post.isEdited(),
+                        post.getAuthorId()
+                );
+
+                // Update the existing post in the posts list
+                posts.set(postIndex, editedPost);
+
+                // Log the removal of a comment
+            }
+        }
+    }
+
 
     public void editComment(Post post, Comment comment) {
        // edit comment of post
