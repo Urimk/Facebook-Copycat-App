@@ -23,31 +23,56 @@ public class CommentAdapter extends BaseAdapter {
     private Context context;
     private DB database; // Reference to the database
     private Post associatedPost; // Reference to the associated Post
+    private CommentChangeListener commentChangeListener;
+    private TextView commentCountTextView;
 
-    public CommentAdapter(Context context, List<Comment> commentList, DB database, Post associatedPost) {
+
+
+
+    public CommentAdapter(Context context, List<Comment> commentList, DB database, Post associatedPost, TextView commentCountTextView) {
         this.context = context;
         this.commentList = commentList;
         this.inflater = LayoutInflater.from(context);
         this.database = database; // Initialize the reference to the database
+        this.commentCountTextView = commentCountTextView;
         this.associatedPost = associatedPost; // Initialize the reference to the associated Post
     }
 
+    public interface CommentChangeListener {
+        void onCommentChanged(Post associatedPost, TextView commentCountTextView, int newCount);
+    }
+
+    private void updateCommentCount() {
+        if (commentCountTextView != null) {
+            int newCommentCount = commentList.size();
+            commentCountTextView.setText(String.valueOf(newCommentCount));
+        }
+    }
+
+    private void notifyCommentChange(Post associatedPost, TextView commentCountTextView) {
+        if (commentChangeListener != null) {
+            int newCommentCount = getCount();
+            commentChangeListener.onCommentChanged(associatedPost, commentCountTextView, newCommentCount);
+        }
+    }
+
     public void updateComments(List<Comment> newComments) {
-        // Log before updating comments
-        Log.d("CommentAdapter", "Updating comments: " + commentList.size() + " comments before update. Address: " + System.identityHashCode(commentList));
 
         commentList.clear();
         commentList.addAll(newComments);
         notifyDataSetChanged();
 
-        // Log after updating comments
-        Log.d("CommentAdapter", "Updated comments: " + commentList.size() + " comments after update. Address: " + System.identityHashCode(commentList));
+        notifyCommentChange(associatedPost, commentCountTextView);
     }
+
+    public void setCommentChangeListener(CommentChangeListener listener) {
+        this.commentChangeListener = listener;
+    }
+
 
     @Override
     public int getCount() {
         int size = commentList.size();
-        Log.d("CommentAdapter", "Getting comments count: " + size + " comments. Address: " + System.identityHashCode(commentList));
         return size;
     }
 

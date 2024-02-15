@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -20,7 +21,7 @@ import android.widget.ToggleButton;
 
 import java.util.List;
 
-public class PostAdapter extends BaseAdapter {
+public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentChangeListener {
 
     private List<Post> postList;
     private LayoutInflater inflater;
@@ -69,16 +70,24 @@ public class PostAdapter extends BaseAdapter {
 
         // Populate the views with post details
         TextView postContentTextView = view.findViewById(R.id.postContentTextView);
-        ToggleButton likeButton = view.findViewById(R.id.likeButton);
-        Button commentButton = view.findViewById(R.id.commentButton);
+        ImageButton likeButton = view.findViewById(R.id.likeButton);
+        ImageButton commentButton = view.findViewById(R.id.commentButton);
         Button postButton = view.findViewById(R.id.postButton);
         EditText commentEditText = view.findViewById(R.id.commentEditText);
-        Button shareButton = view.findViewById(R.id.shareButton);
+        ImageButton shareButton = view.findViewById(R.id.shareButton);
         TextView postUserName = view.findViewById(R.id.displayNameTextView);
+        TextView likeCountTextView = view.findViewById(R.id.likeCount);
+        TextView commentCountTextView = view.findViewById(R.id.commentCount);
 
         if (currentUser.getUserName() != null) {
             postUserName.setText(currentUser.getUserNick());
         }
+
+        int likeCount = currentPost.getLikes();
+        likeCountTextView.setText(String.valueOf(likeCount));
+
+        int commentCount = currentPost.getComments().size();
+        commentCountTextView.setText(String.valueOf(commentCount));
 
         postContentTextView.setText(currentPost.getContent());
 
@@ -155,19 +164,31 @@ public class PostAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 // Check if the post is liked or not
-                if (!likeButton.isChecked()) {
+                if (!likeButton.isSelected()) {
                     // If not liked, increase the like count by 1
                     currentPost.incLikes();
-                    likeButton.setText("Liked");
                     database.getPostsDB().incLikes(currentPost, 1);
+
+                    // Set the Liked_icon when the button is pressed
+                    likeButton.setImageResource(R.drawable.liked_icon);
                 } else {
                     // If already liked, decrease the like count by 1
                     currentPost.decLikes();
-                    likeButton.setText("Like");
                     database.getPostsDB().incLikes(currentPost, -1);
+
+                    // Set the original icon when the button is released
+                    likeButton.setImageResource(R.drawable.like_icon);
                 }
+
+                // Toggle the selected state of the likeButton
+                likeButton.setSelected(!likeButton.isSelected());
+
+                // Update the TextView with the new like count
+                int newLikeCount = currentPost.getLikes(); // Fetch the updated like count from the post
+                likeCountTextView.setText(String.valueOf(newLikeCount)); // Set the like count to the TextView
             }
         });
+
 
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -180,7 +201,8 @@ public class PostAdapter extends BaseAdapter {
         CommentAdapter commentAdapter;
         ListView commentListView = view.findViewById(R.id.commentListView);
         if (convertView == null) {
-            commentAdapter = new CommentAdapter(context, currentPost.getComments(), database, currentPost);
+            commentAdapter = new CommentAdapter(context, currentPost.getComments(), database, currentPost, commentCountTextView);
+            commentAdapter.setCommentChangeListener(this);
             commentListView.setAdapter(commentAdapter);
         } else {
             // Use the existing commentAdapter
@@ -217,6 +239,13 @@ public class PostAdapter extends BaseAdapter {
 
         return view;
     }
+
+    public void onCommentChanged(Post associatedPost, TextView commentCountTextView, int newCommentCount) {
+        commentCountTextView.setText(String.valueOf(newCommentCount));
+    }
+
+
+
 
     private void shareContent() {
         Intent shareIntent = new Intent();
