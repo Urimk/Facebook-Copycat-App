@@ -25,7 +25,6 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        DB db= new DB(this);
 
         EditText editTextUsername = findViewById(R.id.editTextUsername);
         EditText editTextPassword = findViewById(R.id.editTextPassword);
@@ -38,6 +37,7 @@ public class RegisterActivity extends AppCompatActivity {
         TextView errorPassword = findViewById(R.id.errorPassword);
         TextView errorConfirmPassword = findViewById(R.id.errorConfirmPassword);
         TextView errorDisplayName = findViewById(R.id.errorDisplayName);
+        pfpUri = Uri.parse(""); // incase use
 
 
         // Set onClickListener for the Register button

@@ -7,7 +7,9 @@
     <string name="d_name">Display Name</string>
     <string name="profile_pic">Profile Picture</string>
     <string name="upload">Upload</string>
-
+    <string name="login">Login to Facebook</string>
+    <string name="login_btn">Login</string>
+    <string name="incorrect_info">Incorrect username or password</string>
 
 
 </resources>
