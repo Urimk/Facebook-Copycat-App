@@ -1,9 +1,12 @@
 package com.example.facebookapp;
 
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -17,9 +20,14 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class FeedActivity extends AppCompatActivity {
 
@@ -32,20 +40,24 @@ public class FeedActivity extends AppCompatActivity {
     private ListView postsListView;
 
     private User currentUser;  // Sample session user
-    private DB database; // Reference to the database
 
     private Uri selectedImageUri;  // Use Uri instead of Bitmap
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_feed);
 
-        // Initialize the sample session user
-        currentUser = new User("SampleUser", "", "UserNick", 123, "samplePassword");
+        Intent intent = getIntent();
+        if (intent != null) {
+            String username = intent.getStringExtra("username");
+            currentUser = DB.getUsersDB().getUserByUserName(username);
+            setContentView(R.layout.activity_feed);
+        }
+        else {
+            setContentView(R.layout.unauthorized_feed);
+            return;
+        }
 
-        // Initialize the database
-        database = new DB(this);
 
         // Initialize UI components
         postEditText = findViewById(R.id.postEditText);
@@ -53,6 +65,13 @@ public class FeedActivity extends AppCompatActivity {
         postButton = findViewById(R.id.postButton);
         postsListView = findViewById(R.id.postsListView);
         TextView usernameTextView = findViewById(R.id.usernameTextView);
+        Button logoutButton = findViewById(R.id.logoutButton);
+        logoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
         if (currentUser.getUserName() != null) {
             usernameTextView.setText(currentUser.getUserNick());
@@ -65,6 +84,7 @@ public class FeedActivity extends AppCompatActivity {
         String profileImageUriString = currentUser.getUserPfp();
         if (!profileImageUriString.isEmpty()) {
             Uri profileImageUri = Uri.parse(profileImageUriString);
+
             profileImageView.setImageURI(profileImageUri);
 
         } else {
@@ -93,10 +113,10 @@ public class FeedActivity extends AppCompatActivity {
                     Post newPost = new Post(currentUser.getUserName(), currentUser.getUserPfp(), postText, imageUriString, currentUser.getUserId());
 
                     // Update the posts in the database
-                    database.getPostsDB().addPost(newPost);
+                    DB.getPostsDB().addPost(newPost);
 
                     // Retrieve all posts from the database
-                    List<Post> allPosts = database.getPostsDB().getAllPosts();
+                    List<Post> allPosts = DB.getPostsDB().getAllPosts();
 
                     // Update the ListView with the retrieved posts
                     ((PostAdapter) postsListView.getAdapter()).updatePosts(allPosts);
@@ -112,27 +132,55 @@ public class FeedActivity extends AppCompatActivity {
         });
 
         // Set up the ListView with the PostAdapter
-        PostAdapter adapter = new PostAdapter(this, new ArrayList<>(), currentUser, database);
+        PostAdapter adapter = new PostAdapter(this, new ArrayList<>(), currentUser);
         postsListView.setAdapter(adapter);
 
         // Retrieve all posts from the database
-        List<Post> allPosts = database.getPostsDB().getAllPosts();
+        List<Post> allPosts = DB.getPostsDB().getAllPosts();
 
         // Update the ListView with the retrieved posts
         adapter.updatePosts(allPosts);
+        adapter.notifyDataSetChanged();
     }
 
     private void dispatchImagePickerIntent() {
-        Intent pickPhoto = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(pickPhoto, REQUEST_IMAGE_PICKER);
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("image/*");
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivityForResult(intent, REQUEST_IMAGE_PICKER);
     }
 
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            selectedImageUri = getOutputMediaFileUri();
+            if (selectedImageUri!= null) {
+                //the file allocation succeeded
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, selectedImageUri);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
         }
     }
+
+    // Helper method to create a file Uri for saving the captured image in app
+    private Uri getOutputMediaFileUri() {
+        // Get the directory for the users public pictures directory.
+        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "MyAppImages");
+
+        // Create the storage directory if it does not exist.
+        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
+            Log.e("MyApp", "Failed to create directory");
+            return null; // Return null if the directory creation failed
+        }
+
+        // Create a media file name based on the current time
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        File mediaFile = new File(mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + ".jpg");
+
+        // Return the Uri for the file
+        return FileProvider.getUriForFile(this, "com.example.facebookapp.fileprovider", mediaFile);
+    }
+
 
     private void showImageSourceDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -152,23 +200,24 @@ public class FeedActivity extends AppCompatActivity {
         });
         builder.show();
     }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_IMAGE_PICKER && data != null) {
                 // Handle image selected from gallery
                 selectedImageUri = data.getData();
+                ContentResolver resolver = this.getContentResolver();
+                resolver.takePersistableUriPermission(selectedImageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 // You can use the selectedImageUri as needed (e.g., display in ImageView)
                 Toast.makeText(this, "Image selected from gallery", Toast.LENGTH_SHORT).show();
-            } else if (requestCode == REQUEST_IMAGE_CAPTURE && data != null) {
+            } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                // data is null here because the uri is decided before capture and passed to the intent
                 // Handle image captured from camera
-                selectedImageUri = data.getData();
-                // You can use the selectedImageUri as needed (e.g., display in ImageView)
+                // The Uri is already updated because it was passed to the capture intent as an allocated file
                 Toast.makeText(this, "Image captured from camera", Toast.LENGTH_SHORT).show();
             }
         }
     }
+
 }
