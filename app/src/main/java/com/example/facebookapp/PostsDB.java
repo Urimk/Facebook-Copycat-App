@@ -70,7 +70,7 @@ public class PostsDB {
        // construct a new post because posts are immutable and add the id decided by db
        Post newPost = new Post(post.getAuthorName(), post.getAuthorPfp(),
                post.getPostTime(), post.getLikes(), post.getShares(),
-               this.nextNewPostId, post.getComments(), post.getContent(),
+               this.nextNewPostId, new ArrayList<>(post.getComments()), post.getContent(),
                post.getImg(), post.isEdited(), post.getAuthorId());
        this.nextNewPostId++;
        this.posts.add(newPost);
@@ -187,7 +187,7 @@ public class PostsDB {
         comments.remove(i);
         comments.add(comment);
         Post editedPost = new Post(post.getAuthorName(), post.getAuthorPfp(), post.getPostTime(),
-                post.getLikes(), post.getShares(), post.getPostId(), comments,
+                post.getLikes(), post.getShares(), post.getPostId(), new ArrayList<>(comments),
                 post.getContent(), post.getImg(), post.isEdited(), post.getAuthorId());
         i = 0;
         for (; i < posts.size(); i++) {
