@@ -212,6 +212,7 @@ public class FeedActivity extends AppCompatActivity {
                 // You can use the selectedImageUri as needed (e.g., display in ImageView)
                 Toast.makeText(this, "Image selected from gallery", Toast.LENGTH_SHORT).show();
             } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                // data is null here because the uri is decided before capture and passed to the intent
                 // Handle image captured from camera
                 // The Uri is already updated because it was passed to the capture intent as an allocated file
                 Toast.makeText(this, "Image captured from camera", Toast.LENGTH_SHORT).show();
