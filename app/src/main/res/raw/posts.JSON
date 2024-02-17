@@ -1,13 +1,317 @@
 {
-  "posts": [{"postId" :  1, "likes": 4, "shares": 2, "authorId": 1,
-  "time": {"year": 1999, "month": 3, "day": 20, "hour": 21, "minute": 3},
-  "edited": true, "content": "basic post content", "authorName": "Doctor",
-  "authorPfp": "", "img": "",
-    "comments": [
-      {"authorId": 2, "time": {"year": 2000, "month": 12, "day": 2, "hour": 12,
-      "minute": 20}, "edited": false, "content": "comment content",
-        "authorName": "comment Author", "authorPfp": "", "commentId": 1},
-      {"authorId": 3, "time": {"year": 2010, "month": 10, "day": 2, "hour": 12,
-        "minute": 20}, "edited": false, "content": "2nd comment content",
-        "authorName": "comment Author2", "authorPfp": "pfp", "commentId": 3}]}]
+  "posts": [
+    {
+      "postId": 1,
+      "likes": 4,
+      "shares": 2,
+      "authorId": 1,
+      "time": {
+        "year": 1999,
+        "month": 3,
+        "day": 20,
+        "hour": 21,
+        "minute": 3
+      },
+      "edited": true,
+      "content": "im back",
+      "authorName": "S1mple",
+      "authorPfp": "",
+      "img": "",
+      "comments": [
+        {
+          "authorId": 2,
+          "time": {
+            "year": 2000,
+            "month": 12,
+            "day": 2,
+            "hour": 12,
+            "minute": 20
+          },
+          "edited": false,
+          "content": "comment content",
+          "authorName": "Rom",
+          "authorPfp": "",
+          "commentId": 1
+        },
+        {
+          "authorId": 3,
+          "time": {
+            "year": 2010,
+            "month": 10,
+            "day": 2,
+            "hour": 12,
+            "minute": 20
+          },
+          "edited": false,
+          "content": "2nd comment content",
+          "authorName": "Doctor",
+          "authorPfp": "",
+          "commentId": 3
+        }
+      ]
+    },
+    {
+      "postId": 3,
+      "likes": 42,
+      "shares": 2,
+      "authorId": 3,
+      "time": {
+        "year": 2020,
+        "month": 10,
+        "day": 21,
+        "hour": 21,
+        "minute": 3
+      },
+      "edited": true,
+      "content": "epic post",
+      "authorName": "Doctor",
+      "authorPfp": "",
+      "img": "",
+      "comments": [
+        {
+          "authorId": 2,
+          "time": {
+            "year": 2000,
+            "month": 12,
+            "day": 2,
+            "hour": 12,
+            "minute": 20
+          },
+          "edited": false,
+          "content": "wow man great idea!",
+          "authorName": "Rom",
+          "authorPfp": "",
+          "commentId": 1
+        },
+        {
+          "authorId": 3,
+          "time": {
+            "year": 2010,
+            "month": 10,
+            "day": 2,
+            "hour": 12,
+            "minute": 20
+          },
+          "edited": false,
+          "content": "I commented on my own post!",
+          "authorName": "Mr. Fisk",
+          "authorPfp": "",
+          "commentId": 3
+        },
+        {
+          "authorId": 4,
+          "time": {
+            "year": 2010,
+            "month": 10,
+            "day": 1,
+            "hour": 10,
+            "minute": 20
+          },
+          "edited": false,
+          "content": "Mr. Fisk Sucks!",
+          "authorName": "Mr. Fisk hater",
+          "authorPfp": "",
+          "commentId": 4
+        }
+      ]
+    },
+    {
+      "postId": 2,
+      "likes": 2,
+      "shares": 3,
+      "authorId": 1,
+      "time": {
+        "year": 2020,
+        "month": 2,
+        "day": 12,
+        "hour": 13,
+        "minute": 23
+      },
+      "edited": false,
+      "content": "lol",
+      "authorName": "funny guy",
+      "authorPfp": "",
+      "img": "",
+      "comments": []
+    },
+    {
+      "postId": 4,
+      "likes": 2,
+      "shares": 3,
+      "authorId": 1,
+      "time": {
+        "year": 2013,
+        "month": 2,
+        "day": 12,
+        "hour": 13,
+        "minute": 23
+      },
+      "edited": false,
+      "content": "his name is doctor... doctor... doctor...",
+      "authorName": "funny guy",
+      "authorPfp": "",
+      "img": "",
+      "comments": []
+    },
+    {
+      "postId": 5,
+      "likes": 10,
+      "shares": 3,
+      "authorId": 2,
+      "time": {
+        "year": 2024,
+        "month": 2,
+        "day": 15,
+        "hour": 20,
+        "minute": 58
+      },
+      "edited": false,
+      "content": "man im sick and i gotta finish this project",
+      "authorName": "Rom",
+      "authorPfp": "",
+      "img": "",
+      "comments": []
+    },
+    {
+      "postId": 6,
+      "likes": 10,
+      "shares": 6,
+      "authorId": 1,
+      "time": {
+        "year": 2024,
+        "month": 2,
+        "day": 15,
+        "hour": 20,
+        "minute": 58
+      },
+      "edited": false,
+      "content": "his clinic is open",
+      "authorName": "funny guy",
+      "authorPfp": "",
+      "img": "",
+      "comments": []
+    },
+    {
+      "postId": 7,
+      "likes": 5,
+      "shares": 2,
+      "authorId": 3,
+      "time": {
+        "year": 2020,
+        "month": 10,
+        "day": 21,
+        "hour": 21,
+        "minute": 3
+      },
+      "edited": true,
+      "content": "another doctored post",
+      "authorName": "Doctor",
+      "authorPfp": "",
+      "img": "",
+      "comments": [
+        {
+          "authorId": 2,
+          "time": {
+            "year": 2000,
+            "month": 12,
+            "day": 2,
+            "hour": 12,
+            "minute": 20
+          },
+          "edited": false,
+          "content": "AN EXCLUSIVE!",
+          "authorName": "Rom",
+          "authorPfp": "",
+          "commentId": 1
+        },
+        {
+          "authorId": 3,
+          "time": {
+            "year": 2010,
+            "month": 10,
+            "day": 2,
+            "hour": 12,
+            "minute": 20
+          },
+          "edited": false,
+          "content": "I commented on my own post!",
+          "authorName": "Doctor",
+          "authorPfp": "",
+          "commentId": 3
+        },
+        {
+          "authorId": 4,
+          "time": {
+            "year": 2010,
+            "month": 10,
+            "day": 1,
+            "hour": 10,
+            "minute": 20
+          },
+          "edited": false,
+          "content": "Mr. Fisk Still Sucks!",
+          "authorName": "Mr. Fisk hater",
+          "authorPfp": "",
+          "commentId": 4
+        }
+      ]
+    },
+    {
+      "postId": 8,
+      "likes": 2,
+      "shares": 3,
+      "authorId": 8,
+      "time": {
+        "year": 2013,
+        "month": 4,
+        "day": 1,
+        "hour": 13,
+        "minute": 23
+      },
+      "edited": false,
+      "content": "TME",
+      "authorName": "LUKA",
+      "authorPfp": "",
+      "img": "",
+      "comments": []
+    },
+    {
+      "postId": 9,
+      "likes": 11,
+      "shares": 3,
+      "authorId": 9,
+      "time": {
+        "year": 2017,
+        "month": 4,
+        "day": 12,
+        "hour": 13,
+        "minute": 23
+      },
+      "edited": false,
+      "content": "I'm using tilt controls!",
+      "authorName": "Mariokart player",
+      "authorPfp": "",
+      "img": "",
+      "comments": []
+    },
+    {
+      "postId": 10,
+      "likes": 111,
+      "shares": 3,
+      "authorId": 2,
+      "time": {
+        "year": 2017,
+        "month": 4,
+        "day": 12,
+        "hour": 13,
+        "minute": 23
+      },
+      "edited": false,
+      "content": "bruh why did i make all of these manually instead of just making it in the app",
+      "authorName": "Rom",
+      "authorPfp": "",
+      "img": "",
+      "comments": []
+    }
+  ]
 }

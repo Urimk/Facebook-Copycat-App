@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -91,7 +92,6 @@ public class RegisterActivity extends AppCompatActivity {
                         errorUsername.setVisibility(View.VISIBLE);
                     }
                     else {
-                        Log.v("user", DB.getUsersDB().getUserById(0).toString());
                         finish(); // user has registered- take him back to MainActivity
                     }
                 }
@@ -102,7 +102,9 @@ public class RegisterActivity extends AppCompatActivity {
         buttonUploadImg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.setType("image/*");
+                intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 startActivityForResult(intent, PICK_IMAGE_REQUEST);
             }
         });
@@ -136,6 +138,8 @@ public class RegisterActivity extends AppCompatActivity {
             if (data != null) {
                 pfpUri = data.getData();
                 pfpPreview.setImageURI(pfpUri);
+                ContentResolver resolver = this.getContentResolver();
+                resolver.takePersistableUriPermission(pfpUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
             }
         }
