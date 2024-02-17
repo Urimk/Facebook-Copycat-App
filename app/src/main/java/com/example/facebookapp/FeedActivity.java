@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -17,9 +19,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.FileProvider;
 
 import java.io.File;
@@ -66,6 +70,32 @@ public class FeedActivity extends AppCompatActivity {
         postsListView = findViewById(R.id.postsListView);
         TextView usernameTextView = findViewById(R.id.usernameTextView);
         Button logoutButton = findViewById(R.id.logoutButton);
+        ToggleButton darkModeToggle = findViewById((R.id.darkModeToggle));
+
+        darkModeToggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(FeedActivity.this);
+                boolean currentMode = preferences.getBoolean("dark_mode_enabled", false);
+
+                // Toggle the theme
+                if (currentMode) {
+                    setTheme(R.style.LightTheme);
+                    getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                } else {
+                    setTheme(R.style.DarkTheme);
+                    getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                }
+
+                // Save the updated mode to SharedPreferences
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean("dark_mode_enabled", !currentMode);
+                editor.apply();
+
+                recreate(); // Recreate the activity to apply the new theme
+            }
+        });
+
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
