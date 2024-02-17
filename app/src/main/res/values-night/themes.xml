@@ -1,7 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.FacebookApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+    <!-- Base application theme for light mode -->
+    <style name="DarkTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme attributes here -->
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryDark">@color/white</item>
+
+        <!-- Add other attributes as needed -->
     </style>
+
+    <style name="Theme.FacebookApp" parent="DarkTheme" />
+    <drawable name="default_pfp">@drawable/default_profile_pic_dark</drawable>
 </resources>

@@ -82,9 +82,16 @@ public class RegisterActivity extends AppCompatActivity {
                 }
 
                 if (errorFlag == 0) {
-                    User user = new User(editTextUsername.getText().toString(), pfpUri.toString(),
-                            editTextDisplayName.getText().toString(),
-                            editTextPassword.getText().toString());
+                    User user;
+                    if (pfpUri == null) {
+                        user = new User(editTextUsername.getText().toString(), "",
+                                editTextDisplayName.getText().toString(),
+                                editTextPassword.getText().toString());
+                    } else {
+                        user = new User(editTextUsername.getText().toString(), pfpUri.toString(),
+                                editTextDisplayName.getText().toString(),
+                                editTextPassword.getText().toString());
+                    }
                     int code = DB.getUsersDB().addUser(user);
 
                     if (code == UsersDB.REGISTRATION_FAILED) {
