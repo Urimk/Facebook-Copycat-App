@@ -55,7 +55,7 @@ public class RegisterActivity extends AppCompatActivity {
                 }
 
                 if (!isValidPassword(editTextPassword.getText().toString())) {
-                    errorPassword.setText("Password must have an uppercase letter and a number");
+                    errorPassword.setText("Password must have an uppercase letter and a number and 8 digits or longer");
                     errorPassword.setVisibility(View.VISIBLE);
                     errorFlag = 1;
                 } else {
@@ -115,7 +115,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private boolean isValidPassword(String password) {
         // Password must have an uppercase letter and a number
-        return password.matches(".*[A-Z].*") && password.matches(".*[0-9].*");
+        return password.matches(".*[A-Z].*") && password.matches(".*[0-9].*") && password.length() >= 8;
     }
 
     private boolean doPasswordsMatch(String password, String confirmPassword) {
