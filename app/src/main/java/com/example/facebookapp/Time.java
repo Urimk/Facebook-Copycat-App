@@ -77,7 +77,7 @@ public class Time {
 
         @Override
         public String toString() {
-                return this.day  + "/" + "month" + "/"
-                + this.year + "- " + this.hour + ":" + this.minute;
+                return this.day  + "/" + this.month + "/"
+                + this.year;
         }
 }
