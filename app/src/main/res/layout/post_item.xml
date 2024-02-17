@@ -1,0 +1,196 @@
+<!-- res/layout/post_item.xml -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <!-- Profile Picture and Display Name -->
+    <RelativeLayout
+        android:id="@+id/profileLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Profile Picture -->
+        <ImageView
+            android:id="@+id/profileImageView"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/default_profile_pic"
+            android:layout_alignParentStart="true"/>
+
+        <!-- Display Name -->
+        <TextView
+            android:id="@+id/displayNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="John Doe"
+            android:textSize="16sp"
+            android:layout_toEndOf="@+id/profileImageView"
+            android:layout_marginStart="8dp"/>
+
+        <!-- Edit Icon -->
+        <ImageView
+            android:id="@+id/editIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/edit_icon"
+            android:layout_toStartOf="@id/deleteIcon"
+            android:layout_centerVertical="true"/>
+
+        <!-- Delete Icon -->
+        <ImageView
+            android:id="@+id/deleteIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/delete_icon"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"/>
+
+    </RelativeLayout>
+
+    <!-- Post Text -->
+    <TextView
+        android:id="@+id/postContentTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="This is the post content."
+        android:layout_below="@id/profileLayout"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Post Image -->
+    <ImageView
+        android:id="@+id/postImageView"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_below="@id/postContentTextView"
+        android:layout_marginTop="8dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"/>
+
+    <!-- Date of the Post -->
+    <TextView
+        android:id="@+id/dateTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2 hours ago"
+        android:textSize="12sp"
+        android:layout_below="@id/postImageView"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Like, Share, Comment Buttons -->
+    <LinearLayout
+        android:id="@+id/buttonsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/dateTextView"
+        android:layout_marginTop="4dp">
+
+        <!-- Like Button with Icon and Number -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/likeButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?android:attr/selectableItemBackground"
+                android:padding="16dp"
+                android:src="@drawable/like_icon"/>
+
+            <TextView
+                android:id="@+id/likeCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <!-- Share Button with Icon -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/shareButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:src="@drawable/share_icon"/>
+
+            <TextView
+                android:id="@+id/shareCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <!-- Comment Button with Icon -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/commentButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:src="@drawable/comment_icon"/>
+
+            <TextView
+                android:id="@+id/commentCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- EditText for adding comments (Initially set to GONE) -->
+    <EditText
+        android:id="@+id/commentEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttonsLayout"
+        android:layout_toStartOf="@+id/postButton"
+        android:hint="Write your comment"
+        android:visibility="gone"
+        android:padding="8dp"/>
+
+    <!-- Post Button on the right -->
+    <Button
+        android:id="@+id/postButton"
+        android:layout_width="wrap_content"
+        android:layout_below="@id/buttonsLayout"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:visibility="gone"
+        android:text="Post"/>
+
+    <ListView
+        android:id="@+id/commentListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/commentEditText"
+        android:nestedScrollingEnabled="true"
+        android:layout_marginTop="8dp"/>
+</RelativeLayout>

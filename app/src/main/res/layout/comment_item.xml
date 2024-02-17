@@ -1,0 +1,71 @@
+<!-- res/layout/comment_item.xml -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <!-- Profile Picture and Display Name -->
+    <RelativeLayout
+        android:id="@+id/profileLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Profile Picture -->
+        <ImageView
+            android:id="@+id/profileImageView"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/default_profile_pic"
+            android:layout_alignParentStart="true"/>
+
+        <!-- Display Name -->
+        <TextView
+            android:id="@+id/displayNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="John Doe"
+            android:textSize="16sp"
+            android:layout_toEndOf="@+id/profileImageView"
+            android:layout_marginStart="8dp"/>
+
+        <!-- Edit Icon -->
+        <ImageView
+            android:id="@+id/editIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/edit_icon"
+            android:layout_toStartOf="@id/deleteIcon"
+            android:layout_centerVertical="true"/>
+
+        <!-- Delete Icon -->
+        <ImageView
+            android:id="@+id/deleteIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/delete_icon"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"/>
+    </RelativeLayout>
+
+    <!-- Comment Text -->
+    <TextView
+        android:id="@+id/commentContentTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="This is the comment content."
+        android:layout_below="@id/profileLayout"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Date of the Post -->
+    <TextView
+        android:id="@+id/dateTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2 hours ago"
+        android:textSize="12sp"
+        android:layout_below="@id/commentContentTextView"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Additional Views for Comment Item, if needed -->
+
+</RelativeLayout>
