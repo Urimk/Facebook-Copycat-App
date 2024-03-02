@@ -1,5 +1,7 @@
 package com.example.facebookapp;
 
+import androidx.room.PrimaryKey;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -8,7 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Post {
-    private int postId = -1, likes = 0, shares = 0, authorId;
+    @PrimaryKey(autoGenerate = true)
+    private int postId;
+    private int likes = 0, shares = 0, authorId;
     private String authorName, content;
     private String authorPfp, img;
     private Time postTime;
@@ -124,9 +128,9 @@ public class Post {
         return new ArrayList<>(this.comments);
     }
 
-    public void addComment(User user, String commentText) {
+    public void addComment(Comment comment) {
         int newCommentId = commentIdCounter++; // Increment the counter to get a unique comment ID
-        Comment newComment = new Comment(user.getUserId(), new Time(), false, commentText, user.getUserNick(), user.getUserPfp(), newCommentId);
+        Comment newComment = new Comment(comment, newCommentId);
         comments.add(newComment);
     }
 
@@ -135,5 +139,9 @@ public class Post {
     }
     public boolean isEdited() {
         return edited;
+    }
+
+    public void setPostId(int postId) {
+        this.postId = postId;
     }
 }

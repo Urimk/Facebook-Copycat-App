@@ -22,6 +22,16 @@ public class Comment {
         this.commentId = commentId;
     }
 
+    public Comment(Comment comment, int commentId) {
+        this.authorId = comment.authorId;
+        this.postTime = new Time(comment.postTime);
+        this.edited = comment.edited;
+        this.content = new String(comment.content);
+        this.authorName = new String(comment.authorName);
+        this.authorPfp = new String(comment.authorPfp);
+        this.commentId = commentId;
+    }
+
     public Comment(JSONObject comment) {
         try {
             this.authorId = comment.getInt("authorId");
@@ -73,4 +83,8 @@ public class Comment {
     }
 
     public void setContent(String content) { this.content = content; }
+
+    public void setCommentId(int commentId) {
+        this.commentId = commentId;
+    }
 }
