@@ -217,7 +217,7 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
                             currentUser.getUserName(), currentUser.getUserPfp(), 1);
 
                     // Update the post in the database with the new comment
-                    DB.getPostsDB().getPostById(currentPost.getPostId()).addComment(currentUser, newComment.getContent());
+                    DB.getPostsDB().getPostById(currentPost.getPostId()).addComment(newComment);
 
                     // Update the CommentAdapter to reflect the new comment
                     commentAdapter.updateComments(DB.getPostsDB().getPostById(currentPost.getPostId()).getComments());
