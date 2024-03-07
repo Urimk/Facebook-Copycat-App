@@ -231,11 +231,39 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
             }
         });
 
+        // Set click listener for the profile picture
+        profileImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openUserActivity(currentPost.getAuthorName());
+            }
+        });
+
+        // Set click listener for the username
+        postUserName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openUserActivity(currentPost.getAuthorName());
+            }
+        });
+
         return view;
     }
 
     public void onCommentChanged(Post associatedPost, TextView commentCountTextView, int newCommentCount) {
         commentCountTextView.setText(String.valueOf(newCommentCount));
+    }
+
+
+    private void openUserActivity(String userName) {
+        // Create an Intent to start the UserActivity
+        Intent intent = new Intent(context, UserActivity.class);
+
+        // Pass the user ID to the UserActivity
+        intent.putExtra("userName", userName);
+
+        // Start the activity
+        context.startActivity(intent);
     }
 
 
@@ -289,6 +317,7 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
 
         builder.show();
     }
+
 
 }
 

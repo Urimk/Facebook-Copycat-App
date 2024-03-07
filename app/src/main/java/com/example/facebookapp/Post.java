@@ -1,5 +1,6 @@
 package com.example.facebookapp;
 
+import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import org.json.JSONArray;
@@ -8,7 +9,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Entity
 public class Post {
     @PrimaryKey(autoGenerate = true)
     private int postId;

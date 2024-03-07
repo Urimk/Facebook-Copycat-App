@@ -1,6 +1,7 @@
 package com.example.facebookapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -145,6 +146,22 @@ public class CommentAdapter extends BaseAdapter {
             }
         });
 
+        // Set click listener for the profile picture
+        profileImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openUserActivity(currentComment.getAuthorName());
+            }
+        });
+
+        // Set click listener for the username
+        displayNameTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openUserActivity(currentComment.getAuthorName());
+            }
+        });
+
         return view;
     }
 
@@ -187,5 +204,16 @@ public class CommentAdapter extends BaseAdapter {
         });
 
         builder.show();
+    }
+
+    private void openUserActivity(String userName) {
+        // Create an Intent to start the UserActivity
+        Intent intent = new Intent(context, UserActivity.class);
+
+        // Pass the user ID to the UserActivity
+        intent.putExtra("userName", userName);
+
+        // Start the activity
+        context.startActivity(intent);
     }
 }
