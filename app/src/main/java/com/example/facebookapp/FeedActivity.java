@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,6 +27,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.FileProvider;
 
+import com.example.facebookapp.callbacks.GetUserCallback;
+import com.example.facebookapp.returntypes.UserIdResponse;
+import com.google.gson.Gson;
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,7 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class FeedActivity extends AppCompatActivity {
+public class FeedActivity extends AppCompatActivity implements GetUserCallback {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_PICKER = 2;
@@ -42,6 +47,7 @@ public class FeedActivity extends AppCompatActivity {
     private ImageButton imageUploadButton;
     private Button postButton;
     private ListView postsListView;
+    private TextView usernameTextView;
 
     private User currentUser;  // Sample session user
 
@@ -54,7 +60,18 @@ public class FeedActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null) {
             String username = intent.getStringExtra("username");
-            currentUser = DB.getUsersDB().getUserByUserName(username);
+            SharedPreferences sharedPreferences = this.getSharedPreferences("MyPrefs", this.MODE_PRIVATE);
+            String jwt = sharedPreferences.getString("jwt", null);
+            String[] jwtParts = jwt.split("\\.");
+            String payload = jwtParts[1];
+            byte[] decodedBytes = Base64.decode(payload, Base64.DEFAULT);
+            String decodedPayLoad = new String(decodedBytes);
+            Gson gson = new Gson();
+            UserIdResponse response = gson.fromJson(decodedPayLoad, UserIdResponse.class);
+            int userId = response.getUserId();
+            PostsViewModel viewModel = new PostsViewModel(userId);
+            UserApi userApi = new UserApi();
+            userApi.getUser(userId, this);
             setContentView(R.layout.activity_feed);
         }
         else {
@@ -68,7 +85,7 @@ public class FeedActivity extends AppCompatActivity {
         imageUploadButton = findViewById(R.id.imageUploadButton);
         postButton = findViewById(R.id.postButton);
         postsListView = findViewById(R.id.postsListView);
-        TextView usernameTextView = findViewById(R.id.usernameTextView);
+        usernameTextView = findViewById(R.id.usernameTextView);
         Button logoutButton = findViewById(R.id.logoutButton);
         ToggleButton darkModeToggle = findViewById((R.id.darkModeToggle));
 
@@ -103,24 +120,7 @@ public class FeedActivity extends AppCompatActivity {
             }
         });
 
-        if (currentUser.getUserName() != null) {
-            usernameTextView.setText(currentUser.getUserNick());
-        }
 
-        // Inside FeedActivity, after initializing UI components
-        ImageView profileImageView = findViewById(R.id.profileImageView);
-
-        // Set the profile image URI if available
-        String profileImageUriString = currentUser.getUserPfp();
-        if (!profileImageUriString.isEmpty()) {
-            Uri profileImageUri = Uri.parse(profileImageUriString);
-
-            profileImageView.setImageURI(profileImageUri);
-
-        } else {
-            // Set a default image or handle the case when there is no profile image
-            profileImageView.setImageResource(R.drawable.default_profile_pic);
-        }
 
         // Set click listener for the Image Upload button
         imageUploadButton.setOnClickListener(new View.OnClickListener() {
@@ -250,4 +250,33 @@ public class FeedActivity extends AppCompatActivity {
         }
     }
 
+    private void showUserInfo() {
+        if (currentUser.getUserName() != null) {
+            usernameTextView.setText(currentUser.getUserNick());
+        }
+
+        // Inside FeedActivity, after initializing UI components
+        ImageView profileImageView = findViewById(R.id.profileImageView);
+
+        // Set the profile image URI if available
+        String profileImageUriString = currentUser.getUserPfp();
+        if (!profileImageUriString.isEmpty()) {
+            profileImageView.setImageBitmap(ImageUtils.decodeImageFromBase64(currentUser.getUserPfp()));
+
+        } else {
+            // Set a default image or handle the case when there is no profile image
+            profileImageView.setImageResource(R.drawable.default_profile_pic);
+        }
+    }
+
+    @Override
+    public void onSuccess(User user) {
+        currentUser = user;
+        showUserInfo();
+    }
+
+    @Override
+    public void onFailure() {
+
+    }
 }

@@ -1,5 +1,7 @@
 package com.example.facebookapp;
 
+import com.example.facebookapp.returntypes.TokenResponse;
+
 import java.util.List;
 
 import retrofit2.Call;
@@ -28,4 +30,13 @@ public interface WebServiceAPI {
 
     @DELETE("{id}/posts/{pid}")
     Call<Void> deletePost(@Path("id") int userId, @Path("pid") int postId);
+
+    @POST("users")
+    Call<User> createUser(@Body User user);
+
+    @POST("tokens")
+    Call<TokenResponse> getToken(@Body User user);
+
+    @GET("users/{id}")
+    Call<User> getUser(@Path("id") int userId);
 }

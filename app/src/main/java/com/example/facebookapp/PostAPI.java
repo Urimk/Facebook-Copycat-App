@@ -24,7 +24,7 @@ public class PostAPI {
     //the id of the user currently logged into the app
     private int loggedInUserId;
 
-    private final String BASE_URL = "http://localhost:80";
+    private final String BASE_URL = "http://10.0.2.2:3001/api/";
 
     public PostAPI(MutableLiveData<List<Post>> postListData, PostDao postDao, int loggedInUserId) {
         this.postListData = postListData;
@@ -34,7 +34,7 @@ public class PostAPI {
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        webServiceAPI = retrofit.create(webServiceAPI.getClass());
+        webServiceAPI = retrofit.create(WebServiceAPI.class);
         this.loggedInUserId = loggedInUserId;
     }
 

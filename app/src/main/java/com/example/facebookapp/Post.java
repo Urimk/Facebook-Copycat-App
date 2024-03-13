@@ -1,5 +1,7 @@
 package com.example.facebookapp;
 
+import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import org.json.JSONArray;
@@ -9,20 +11,22 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
 public class Post {
     @PrimaryKey(autoGenerate = true)
     private int postId;
     private int likes = 0, shares = 0, authorId;
     private String authorName, content;
     private String authorPfp, img;
-    private Time postTime;
+    private String postTime;
+    @Ignore
     private List<Comment> comments;
     private boolean edited;
 
     private static int commentIdCounter = 0;
 
 
-    public Post(String authorName, String authorPfp, Time postTime, int likes, int shares,
+    public Post(String authorName, String authorPfp, String postTime, int likes, int shares,
                 int postId, List<Comment> comments, String content, String img, boolean edited,
                 int authorId) {
         this.postId = postId;
@@ -32,7 +36,7 @@ public class Post {
         this.content = new String(content);
         this.authorPfp = new String(authorPfp);
         this.img = new String(img);
-        this.postTime = new Time(postTime);
+        this.postTime = postTime + "";
         this.comments = new ArrayList<>(comments);
         this.edited = edited;
         this.authorId = authorId;
@@ -45,7 +49,7 @@ public class Post {
         this.content = new String(content);
         this.authorPfp = new String(authorPfp);
         this.img = new String(img);
-        this.postTime = new Time();
+        this.postTime = "now";
         this.comments = new ArrayList<>();
         this.edited = false;
         this.authorId = authorId;
@@ -57,7 +61,7 @@ public class Post {
             this.likes = jsonPost.getInt("likes");
             this.shares = jsonPost.getInt("shares");
             this.authorId = jsonPost.getInt("authorId");
-            this.postTime = new Time(jsonPost.getJSONObject("time"));
+            this.postTime = jsonPost.getString("time");
             this.edited = jsonPost.getBoolean("edited");
             this.content = jsonPost.getString("content");
             this.authorName = jsonPost.getString("authorName");
@@ -76,7 +80,7 @@ public class Post {
             this.likes = 0;
             this.shares = 0;
             this.authorId = -1;
-            this.postTime = new Time();
+            this.postTime = "now";
             this.edited = false;
             this.content = "";
             this.authorName = "";
@@ -120,7 +124,7 @@ public class Post {
         return img;
     }
 
-    public Time getPostTime() {
+    public String getPostTime() {
         return postTime;
     }
 
@@ -143,5 +147,37 @@ public class Post {
 
     public void setPostId(int postId) {
         this.postId = postId;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
+
+    public void setShares(int shares) {
+        this.shares = shares;
+    }
+
+    public void setAuthorId(int authorId) {
+        this.authorId = authorId;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
+
+    public void setAuthorPfp(String authorPfp) {
+        this.authorPfp = authorPfp;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
+    }
+
+    public void setPostTime(String postTime) {
+        this.postTime = postTime;
+    }
+
+    public void setEdited(boolean edited) {
+        this.edited = edited;
     }
 }
