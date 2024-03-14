@@ -2,6 +2,7 @@ package com.example.facebookapp;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -9,13 +10,18 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import com.example.facebookapp.callbacks.GetFriendsCallback;
+import com.example.facebookapp.callbacks.GetUserCallback;
 
-public class RequestsActivity extends Activity {
+import java.util.ArrayList;
+import java.util.List;
+
+public class RequestsActivity extends Activity implements GetUserCallback {
 
     private ListView requestsListView;
-    private ArrayList<String> requestsList;
-    private ArrayAdapter<String> requestsAdapter;
+    private int userId;
+    private List<FriendRequest> friendRequests;
+    private RequestAdapter requestAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,13 +31,17 @@ public class RequestsActivity extends Activity {
         // Initialize views
         ImageButton backButton = findViewById(R.id.backButton);
         requestsListView = findViewById(R.id.requestsListView);
+        friendRequests = new ArrayList<>();
 
-        // Populate sample requests list
-        populateRequestsList();
+        userId = getIntent().getIntExtra("userId", -1);
+        Log.v("userid: ", userId + "");
+        requestAdapter = new RequestAdapter(this, friendRequests, userId);
+        requestsListView.setAdapter(requestAdapter);
 
         // Set adapter for the requests list
-        requestsAdapter = new ArrayAdapter<>(this, R.layout.request_item, requestsList);
-        requestsListView.setAdapter(requestsAdapter);
+        UserApi userApi = new UserApi();
+        userApi.getUser(userId, true, this);
+
 
         // Set click listener for the back button
         backButton.setOnClickListener(new View.OnClickListener() {
@@ -41,33 +51,28 @@ public class RequestsActivity extends Activity {
             }
         });
 
-        // Set click listener for list items
-        requestsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String request = requestsList.get(position);
-                // Handle the click event for each request item (e.g., confirm request)
-                confirmRequest(request);
+    }
+
+    @Override
+    public void onSuccess(User user, boolean isLoggedUser) {
+        if (isLoggedUser) {
+            List<Integer> requests = user.getFriendRequests();
+            for (Integer request: requests
+                 ) {
+                // get info about all of the requesters
+                UserApi userApi = new UserApi();
+                userApi.getUser(request, false, this);
             }
-        });
+        }
+        else {
+            friendRequests.add(new FriendRequest(user.getUserNick(), user.getUserPfp(), user.getUserId()));
+        }
+        requestAdapter.changeRequests(friendRequests);
+        requestAdapter.notifyDataSetChanged();
     }
 
-    // Method to populate sample requests list (Replace with your actual logic to load requests)
-    private void populateRequestsList() {
-        requestsList = new ArrayList<>();
-        requestsList.add("Request 1");
-        requestsList.add("Request 2");
-        requestsList.add("Request 3");
-        // Add more requests as needed
-    }
+    @Override
+    public void onFailure() {
 
-    // Method to handle confirming a friend request (Replace with your actual logic)
-    private void confirmRequest(String request) {
-        // Remove the confirmed request from the list
-        requestsList.remove(request);
-        // Update the ListView
-        requestsAdapter.notifyDataSetChanged();
-        // Show confirmation message
-        Toast.makeText(this, "Request confirmed: " + request, Toast.LENGTH_SHORT).show();
     }
 }

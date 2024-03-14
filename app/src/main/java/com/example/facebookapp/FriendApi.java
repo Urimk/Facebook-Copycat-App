@@ -2,6 +2,7 @@ package com.example.facebookapp;
 
 import android.util.Log;
 
+import com.example.facebookapp.callbacks.AcceptFriendCallback;
 import com.example.facebookapp.callbacks.AddFriendCallback;
 import com.example.facebookapp.callbacks.GetFriendsCallback;
 
@@ -77,10 +78,10 @@ public class FriendApi {
     }
 
     void getFriends(int userId, GetFriendsCallback callback) {
-        Call<List<Integer>> call = webServiceAPI.getFriends(userId);
-        call.enqueue(new Callback<List<Integer>>() {
+        Call<List<FriendRequest>> call = webServiceAPI.getFriends(userId);
+        call.enqueue(new Callback<List<FriendRequest>>() {
             @Override
-            public void onResponse(Call<List<Integer>> call, Response<List<Integer>> response) {
+            public void onResponse(Call<List<FriendRequest>> call, Response<List<FriendRequest>> response) {
                 if (!response.isSuccessful()) {
                     callback.onFailure();
                 }
@@ -90,10 +91,29 @@ public class FriendApi {
             }
 
             @Override
-            public void onFailure(Call<List<Integer>> call, Throwable t) {
+            public void onFailure(Call<List<FriendRequest>> call, Throwable t) {
 
             }
         });
+    }
 
+    void acceptFriend(int userId, int friendId, AcceptFriendCallback callback) {
+        Call<Void> call = webServiceAPI.acceptFriend(userId, friendId);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (!response.isSuccessful()) {
+                    callback.onFailure();
+                }
+                else {
+                    callback.onSuccess(friendId);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                callback.onFailure();
+            }
+        });
     }
 }

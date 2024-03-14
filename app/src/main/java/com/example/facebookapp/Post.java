@@ -49,7 +49,12 @@ public class Post {
         this.authorName = new String(authorName);
         this.content = new String(content);
         this.authorPfp = new String(authorPfp);
-        this.img = new String(img);
+        if (img != null) {
+            this.img = new String(img);
+        }
+        else {
+            this.img = "";
+        }
         this.postTime = "now";
         this.comments = new ArrayList<>();
         this.edited = false;

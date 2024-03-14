@@ -180,6 +180,7 @@ public class FeedActivity extends AppCompatActivity implements GetUserCallback, 
             public void onClick(View v) {
                 // Start the RequestsActivity
                 Intent intent = new Intent(FeedActivity.this, RequestsActivity.class);
+                intent.putExtra("userId", currentUser.getUserId());
                 startActivity(intent);
             }
         });
@@ -346,6 +347,8 @@ public class FeedActivity extends AppCompatActivity implements GetUserCallback, 
             showUserInfo();
             adapter = new PostAdapter(this, new ArrayList<>(), currentUser, this);
             postsListView.setAdapter(adapter);
+            FriendApi friendApi = new FriendApi();
+            friendApi.getFriends(currentUser.getUserId(), this);
         }
         else {
             wallUser = user;
@@ -361,11 +364,14 @@ public class FeedActivity extends AppCompatActivity implements GetUserCallback, 
     }
 
     @Override
-    public void onSuccess(List<Integer> friendsList) {
-        if (friendsList.contains(wallId)) {
-            // connected and wall are friends show post
-            refreshLayout.setVisibility(View.VISIBLE);
-
+    public void onSuccess(List<FriendRequest> friendsList) {
+        for (int i = 0; i < friendsList.size(); i++) {
+            if (friendsList.get(i).getUserId() == wallId) {
+                // connected and wall are friends show post
+                refreshLayout.setVisibility(View.VISIBLE);
+                addFriendBtn.setVisibility(View.GONE);
+                return;
+            }
         }
     }
 

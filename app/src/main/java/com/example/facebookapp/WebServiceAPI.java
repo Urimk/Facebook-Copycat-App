@@ -45,7 +45,7 @@ public interface WebServiceAPI {
     Call<Void> addFriend(@Path("id") int userId);
 
     @GET("users/{id}/friends")
-    Call<List<Integer>> getFriends(@Path("id") int userId);
+    Call<List<FriendRequest>> getFriends(@Path("id") int userId);
 
     @PATCH("users/{id}/friends/{fid}")
     Call<Void> acceptFriend(@Path("id") int userId, @Path("fid") int friendId);
