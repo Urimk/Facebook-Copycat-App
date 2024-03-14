@@ -366,7 +366,7 @@ public class FeedActivity extends AppCompatActivity implements GetUserCallback, 
     @Override
     public void onSuccess(List<FriendRequest> friendsList) {
         for (int i = 0; i < friendsList.size(); i++) {
-            if (friendsList.get(i).getUserId() == wallId) {
+            if (friendsList.get(i).getUserId() == wallId || (currentUser.getUserId() == wallId)) {
                 // connected and wall are friends show post
                 refreshLayout.setVisibility(View.VISIBLE);
                 addFriendBtn.setVisibility(View.GONE);
