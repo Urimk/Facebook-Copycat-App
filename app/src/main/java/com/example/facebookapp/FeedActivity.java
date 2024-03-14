@@ -71,6 +71,7 @@ public class FeedActivity extends AppCompatActivity {
         TextView usernameTextView = findViewById(R.id.usernameTextView);
         Button logoutButton = findViewById(R.id.logoutButton);
         ToggleButton darkModeToggle = findViewById((R.id.darkModeToggle));
+        ImageButton friendRequestsButton = findViewById(R.id.friendRequestsButton);
 
         darkModeToggle.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,6 +94,16 @@ public class FeedActivity extends AppCompatActivity {
                 editor.apply();
 
                 recreate(); // Recreate the activity to apply the new theme
+            }
+        });
+
+        // Set click listener for the Friend Requests button
+        friendRequestsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Start the RequestsActivity
+                Intent intent = new Intent(FeedActivity.this, RequestsActivity.class);
+                startActivity(intent);
             }
         });
 
