@@ -148,6 +148,7 @@ public class FeedActivity extends AppCompatActivity implements GetUserCallback, 
                 viewModel.reload();
             }
         });
+        ImageButton friendRequestsButton = findViewById(R.id.friendRequestsButton);
 
         darkModeToggle.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -170,6 +171,16 @@ public class FeedActivity extends AppCompatActivity implements GetUserCallback, 
                 editor.apply();
 
                 recreate(); // Recreate the activity to apply the new theme
+            }
+        });
+
+        // Set click listener for the Friend Requests button
+        friendRequestsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Start the RequestsActivity
+                Intent intent = new Intent(FeedActivity.this, RequestsActivity.class);
+                startActivity(intent);
             }
         });
 

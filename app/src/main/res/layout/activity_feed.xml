@@ -4,6 +4,8 @@
     android:background="?android:attr/windowBackground"
     android:layout_height="match_parent">
 
+    <!-- Top Menu with Search Bar -->
+
     <RelativeLayout
         android:id="@+id/topBarLayout"
         android:layout_width="match_parent"
@@ -16,43 +18,59 @@
             android:id="@+id/profileImageView"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/default_pfp"
-            android:layout_alignParentStart="true"/>
+            android:layout_alignParentStart="true"
+            android:src="@drawable/default_pfp" />
 
         <!-- Username -->
         <TextView
             android:id="@+id/usernameTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="JohnDoe"
-            android:textSize="16sp"
-            android:layout_toEndOf="@+id/profileImageView"
             android:layout_marginStart="8dp"
-            android:textColor="?attr/colorPrimaryDark"/>
+            android:layout_toEndOf="@+id/profileImageView"
+            android:text="JohnDoe"
+            android:textColor="?attr/colorPrimaryDark"
+            android:textSize="16sp" />
 
         <!-- Dark Mode Toggle -->
+
+        <!-- Friend Requests Button -->
+
+        <!-- Logout Button -->
+
         <ToggleButton
             android:id="@+id/darkModeToggle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dark Mode"
-            android:layout_toStartOf="@+id/logoutButton"
             android:layout_marginStart="16dp"
-            android:textColor="@android:color/white"/>
+            android:layout_marginEnd="65dp"
+            android:layout_toStartOf="@+id/logoutButton"
+            android:text="Dark Mode"
+            android:textColor="@android:color/white" />
 
-        <!-- Logout Button -->
+        <ImageButton
+            android:id="@+id/friendRequestsButton"
+            android:layout_width="57dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="5dp"
+            android:layout_toStartOf="@+id/logoutButton"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Friend Requests"
+            android:padding="8dp"
+            android:src="@drawable/ic_friend_requests" />
+
         <Button
             android:id="@+id/logoutButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Logout"
             android:layout_alignParentEnd="true"
             android:backgroundTint="@color/purple"
-            android:textColor="@android:color/white"/>
+            android:text="Logout"
+            android:textColor="@android:color/white" />
 
     </RelativeLayout>
 
-    <!-- Top Menu with Search Bar -->
     <RelativeLayout
         android:id="@+id/topMenuLayout"
         android:layout_width="match_parent"

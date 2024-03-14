@@ -2,6 +2,7 @@ package com.example.facebookapp;
 
 import androidx.room.Entity;
 import androidx.room.Ignore;
+import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import org.json.JSONArray;
