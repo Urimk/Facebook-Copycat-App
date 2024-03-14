@@ -10,35 +10,36 @@ public class PostsViewModel extends ViewModel {
     private LiveData<List<Post>> posts;
 
     public PostsViewModel(int loggedInUserId, int feedUserId) {
-        repository = new PostsRepository(loggedInUserId, feedUserId);
-        posts = repository.getAll();
-    }
-    public PostsViewModel(int loggedInUserId) {
-        repository = new PostsRepository(loggedInUserId);
-        posts = repository.getAll();
+        if (feedUserId == -1) {
+            this.repository = new PostsRepository(loggedInUserId);
+        }
+        else {
+            this.repository = new PostsRepository(loggedInUserId, feedUserId);
+        }
+        this.posts = this.repository.getAll();
     }
 
     public LiveData<List<Post>> get() {
-        return posts;
+        return this.posts;
     }
 
     public void add(Post post) {
-        repository.add(post);
+        this.repository.add(post);
     }
 
     public void delete(Post post) {
-        repository.delete(post);
+        this.repository.delete(post);
     }
 
     public void edit(Post post) {
-        repository.update(post);
+        this.repository.update(post);
     }
 
     public void addComment(Comment comment, Post fatherPost) {
-        repository.addComment(comment, fatherPost);
+        this.repository.addComment(comment, fatherPost);
     }
 
     public void reload() {
-        repository.reload();
+        this.repository.reload();
     }
 }

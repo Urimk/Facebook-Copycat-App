@@ -60,7 +60,6 @@
         android:layout_below="@id/topBarLayout"
         android:padding="16dp">
 
-        <!-- Add your search bar widget here -->
         <EditText
             android:id="@+id/searchEditText"
             android:layout_width="match_parent"
@@ -68,8 +67,6 @@
             android:hint="Search"
             android:textColor="?android:attr/textColorPrimary"
             android:padding="8dp"/>
-
-        <!-- Add other menu items as needed -->
 
     </RelativeLayout>
 
@@ -109,13 +106,51 @@
 
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/wallInfoLayout"
+        android:layout_below="@id/topBarLayout"
+        android:visibility="gone">
+
+        <!-- ImageButton for image upload on the left -->
+        <ImageView
+            android:id="@+id/wallPfp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/ic_image_upload" />
+
+        <!-- EditText for post text in the center -->
+        <TextView
+            android:id="@+id/wallUsernick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/wallPfp"
+            android:padding="8dp"/>
+
+        <ImageButton
+            android:id="@+id/addFriend"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:scaleType="fitCenter"
+            android:layout_toEndOf="@+id/wallUsernick"
+            android:src="@drawable/add_friend" />
+    </RelativeLayout>
+
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/writePostLayout">
     <ListView
         android:id="@+id/postsListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/writePostLayout"
         android:nestedScrollingEnabled="true"
         android:divider="@android:color/darker_gray"
         android:dividerHeight="1dp"/>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </RelativeLayout>

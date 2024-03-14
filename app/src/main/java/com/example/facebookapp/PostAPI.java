@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import java.util.List;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -30,9 +31,15 @@ public class PostAPI {
         this.postListData = postListData;
         this.dao = postDao;
 
+        // add jwt to requests with some kind of middleware
+        AuthInterceptor interceptor = new AuthInterceptor();
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+        httpClient.addInterceptor(interceptor);
+
         retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
+                .client(httpClient.build())
                 .build();
         webServiceAPI = retrofit.create(WebServiceAPI.class);
         this.loggedInUserId = loggedInUserId;
@@ -58,19 +65,21 @@ public class PostAPI {
                     // response failed handle failure, get a new token(?)
                     Log.v("postApi fail", "failed to get posts");
                 }
-                new Thread(() -> {
-                    if (response.body() != null) {
-                        if (feedUserId == HOME_PAGE_FEED) {
-                            dao.clear();
-                            // convert returned collection to an array for insert
-                            dao.insert(response.body().toArray(new Post[0]));
-                            postListData.postValue(dao.index());
-                        } else {
-                            // if current feed is a user's wall do not save to local db
-                            postListData.postValue(response.body());
+                else {
+                    new Thread(() -> {
+                        if (response.body() != null) {
+                            if (feedUserId == HOME_PAGE_FEED) {
+                                dao.clear();
+                                // convert returned collection to an array for insert
+                                dao.insert(response.body().toArray(new Post[0]));
+                                postListData.postValue(dao.index());
+                            } else {
+                                // if current feed is a user's wall do not save to local db
+                                postListData.postValue(response.body());
+                            }
                         }
-                    }
-                }).start();
+                    }).start();
+                }
             }
 
             @Override
@@ -81,29 +90,34 @@ public class PostAPI {
     }
 
     public void add(Post post) {
-        Call<Integer> call = webServiceAPI.createPost(post, loggedInUserId);
-        call.enqueue(new Callback<Integer>() {
+        Call<Post> call = webServiceAPI.createPost(post, loggedInUserId);
+        call.enqueue(new Callback<Post>() {
             @Override
-            public void onResponse(Call<Integer> call, Response<Integer> response) {
+            public void onResponse(Call<Post> call, Response<Post> response) {
+                Log.v("response", "wtf?");
                 //post was added remotely, add to local storage
                 if (!response.isSuccessful()) {
                     // response failed handle failure, get a new token(?)
                     Log.v("postApi fail", "failed to add post");
                 }
-                new Thread(() -> {
-                    Integer postId = response.body();
-                    post.setPostId(postId.intValue());
-                    dao.insert(post);
-                    List<Post> posts = postListData.getValue();
-                    if (posts != null) {
-                        posts.add(post);
-                    }
-                    postListData.postValue(posts);
-                });
+                else {
+                    new Thread(() -> {
+                        int postId = response.body().getPostId();
+                        Log.v("INSIDE IF", postId + "");
+                        post.setPostId(postId);
+                        dao.insert(post);
+                        List<Post> posts = postListData.getValue();
+                        if (posts != null) {
+                            posts.add(post);
+                        }
+                        postListData.postValue(posts);
+                    }).start();
+                }
             }
 
             @Override
-            public void onFailure(Call<Integer> call, Throwable t) {
+            public void onFailure(Call<Post> call, Throwable t) {
+                Log.v("onfaliure??", "bruhh");
             }
         });
     }
@@ -117,15 +131,16 @@ public class PostAPI {
                     // response failed handle failure, get a new token(?)
                     Log.v("postApi fail", "failed to delete post");
                 }
-                new Thread(() -> {
-                    dao.delete(post);
-                    List<Post> posts = postListData.getValue();
-                    if (posts != null) {
-                        posts.remove(post);
-                    }
-                    postListData.postValue(posts);
-                });
-
+                else {
+                    new Thread(() -> {
+                        dao.delete(post);
+                        List<Post> posts = postListData.getValue();
+                        if (posts != null) {
+                            posts.remove(post);
+                        }
+                        postListData.postValue(posts);
+                    }).start();
+                }
             }
 
             @Override
@@ -144,22 +159,23 @@ public class PostAPI {
                     // response failed handle failure, get a new token(?)
                     Log.v("postApi fail", "failed to update post");
                 }
-                new Thread(() -> {
-                    dao.update(post);
-                    List<Post> posts = postListData.getValue();
-                    if (posts != null) {
-                        int i = 0;
-                        for (i = 0; i < posts.size(); i++) {
-                            if (posts.get(i).getPostId() == post.getPostId()) {
-                                break;
+                else {
+                    new Thread(() -> {
+                        dao.update(post);
+                        List<Post> posts = postListData.getValue();
+                        if (posts != null) {
+                            int i = 0;
+                            for (i = 0; i < posts.size(); i++) {
+                                if (posts.get(i).getPostId() == post.getPostId()) {
+                                    break;
+                                }
                             }
+                            //replace the old post with the new one
+                            posts.set(i, post);
+                            postListData.postValue(posts);
                         }
-                        //replace the old post with the new one
-                        posts.set(i, post);
-                        postListData.postValue(posts);
-                    }
-                });
-
+                    }).start();
+                }
             }
 
             @Override
@@ -177,25 +193,27 @@ public class PostAPI {
                     // response failed handle failure, get a new token(?)
                     Log.v("postApi fail", "failed to add comment");
                 }
-                Integer commentId = response.body();
-                comment.setCommentId(commentId.intValue());
-                fatherPost.addComment(comment);
-                new Thread(() -> {
+                else {
+                    Integer commentId = response.body();
+                    comment.setCommentId(commentId.intValue());
+                    fatherPost.addComment(comment);
+                    new Thread(() -> {
 
-                    dao.update(fatherPost);
-                    List<Post> posts = postListData.getValue();
-                    if (posts != null) {
-                        int i = 0;
-                        for (i = 0; i < posts.size(); i++) {
-                            if (posts.get(i).getPostId() == fatherPost.getPostId()) {
-                                break;
+                        dao.update(fatherPost);
+                        List<Post> posts = postListData.getValue();
+                        if (posts != null) {
+                            int i = 0;
+                            for (i = 0; i < posts.size(); i++) {
+                                if (posts.get(i).getPostId() == fatherPost.getPostId()) {
+                                    break;
+                                }
                             }
+                            //replace the old post with the new one
+                            posts.set(i, fatherPost);
+                            postListData.postValue(posts);
                         }
-                        //replace the old post with the new one
-                        posts.set(i, fatherPost);
-                        postListData.postValue(posts);
-                    }
-                });
+                    }).start();
+                }
 
             }
 

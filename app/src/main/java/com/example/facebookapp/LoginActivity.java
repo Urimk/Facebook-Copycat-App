@@ -59,8 +59,8 @@ public class LoginActivity extends AppCompatActivity implements LoginUserCallBac
     public void onSuccess(String jwt) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("jwt", jwt);
+        AuthInterceptor.setAuthToken(jwt);
         Intent feedIntent = new Intent(LoginActivity.this, FeedActivity.class);
-        Log.v("JWT: ", jwt);
         // put in the username to make sure user has gone through login activity
         feedIntent.putExtra("username", usernameEditText.getText().toString());
         incorrectInfo.setVisibility(View.INVISIBLE);

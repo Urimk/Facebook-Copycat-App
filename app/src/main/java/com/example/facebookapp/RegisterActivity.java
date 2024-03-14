@@ -208,6 +208,7 @@ public class RegisterActivity extends AppCompatActivity implements AddUserCallba
     @Override
     public void onSuccess() {
         // user registered successfully
+        Log.v("WHY AM I HERE?" , "PLEASE");
         finish();
     }
 

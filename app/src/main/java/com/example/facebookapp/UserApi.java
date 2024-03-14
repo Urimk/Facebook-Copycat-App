@@ -35,7 +35,9 @@ public class UserApi {
                     Log.v("userApi fail", "failed to add user");
                     callback.onFailure();
                 }
-                callback.onSuccess();
+                else {
+                    callback.onSuccess();
+                }
             }
 
             @Override
@@ -54,8 +56,10 @@ public class UserApi {
                 if (!response.isSuccessful()) {
                     callBack.onFailure();
                 }
-                assert response.body() != null;
-                callBack.onSuccess(response.body().getString());
+                else {
+                    assert response.body() != null;
+                    callBack.onSuccess(response.body().getString());
+                }
             }
 
             @Override
@@ -65,7 +69,7 @@ public class UserApi {
         });
     }
 
-    void getUser(int userId, GetUserCallback callback) {
+    void getUser(int userId, boolean isWallUser, GetUserCallback callback) {
         Call<User> call = webServiceAPI.getUser(userId);
         call.enqueue(new Callback<User>() {
             @Override
@@ -73,7 +77,9 @@ public class UserApi {
                 if (!response.isSuccessful()) {
                     callback.onFailure();
                 }
-                callback.onSuccess(response.body());
+                else {
+                    callback.onSuccess(response.body(), isWallUser);
+                }
             }
 
             @Override
