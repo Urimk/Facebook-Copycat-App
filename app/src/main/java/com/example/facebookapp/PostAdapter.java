@@ -313,7 +313,22 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
             }
         });
 
-        builder.show();
+        AlertDialog dialog = builder.create();
+
+        // Set button colors
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                Button positiveButton = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                Button negativeButton = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_NEGATIVE);
+
+                // Set button text color
+                positiveButton.setTextColor(context.getResources().getColor(android.R.color.black));
+                negativeButton.setTextColor(context.getResources().getColor(android.R.color.black));
+            }
+        });
+
+        dialog.show();
     }
 
 }
