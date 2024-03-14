@@ -2,6 +2,7 @@ package com.example.facebookapp;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,9 +75,8 @@ public class RequestAdapter extends ArrayAdapter<FriendRequest> implements Accep
 
     @Override
     public void onSuccess(int userId) {
-        ArrayList<FriendRequest> newList = new ArrayList<>();
         for (int i = 0; i < mRequestList.size(); i++) {
-            if (mRequestList.get(i).getUserId() != userId) {
+            if (mRequestList.get(i).getUserId() == userId) {
                 mRequestList.remove(i);
                 break;
             }
