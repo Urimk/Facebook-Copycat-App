@@ -1,11 +1,14 @@
 package com.example.facebookapp;
 
+import java.util.List;
+
 public class User {
     private String userName;
     private String userPfp;
     private String userNick;
     private int userId;
     private String userPass;
+    private List<Integer> friendRequests;
 
     public User(String userName, String userPfp, String userNick, int userId, String userPass) {
         this.userName = new String(userName);
@@ -29,6 +32,11 @@ public class User {
         this.userId = userId;
     }
 
+    public User(String userName, String userPass) {
+        this.userName = userName;
+        this.userPass = userPass;
+    }
+
     public String getUserName() {
         return userName;
     }
@@ -47,6 +55,10 @@ public class User {
 
     public String getUserPass() {
         return userPass;
+    }
+
+    public List<Integer> getFriendRequests() {
+        return friendRequests;
     }
 
     @Override

@@ -112,7 +112,6 @@ public class CommentAdapter extends BaseAdapter {
         Uri userProfilePicUri = Uri.parse(userProfilePicString);
         if (!userProfilePicString.isEmpty()) {
             profileImageView.setImageURI(userProfilePicUri);
-            Log.d("UserProfilePicDebug", "UserProfilePicUri: " + userProfilePicUri.toString());
         } else {
             // Set a default profile picture if the user's profile picture is empty
             profileImageView.setImageResource(R.drawable.default_profile_pic);

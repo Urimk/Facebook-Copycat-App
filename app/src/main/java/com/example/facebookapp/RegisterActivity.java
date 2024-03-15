@@ -1,19 +1,19 @@
 package com.example.facebookapp;
 
-import androidx.activity.result.ActivityResult;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -22,16 +22,22 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.facebookapp.callbacks.AddUserCallback;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity implements AddUserCallback {
     private ImageView pfpPreview;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_PICKER = 2;
     private Uri pfpUri;
+    private String basedImage = "";
+    private TextView errorUsername;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +51,14 @@ public class RegisterActivity extends AppCompatActivity {
         Button buttonRegister = findViewById(R.id.buttonRegister);
         Button buttonUploadImg = findViewById(R.id.buttonUploadImage);
         pfpPreview = findViewById(R.id.pfpPreview);
-        TextView errorUsername = findViewById(R.id.errorUsername);
+        errorUsername = findViewById(R.id.errorUsername);
         TextView errorPassword = findViewById(R.id.errorPassword);
         TextView errorConfirmPassword = findViewById(R.id.errorConfirmPassword);
         TextView errorDisplayName = findViewById(R.id.errorDisplayName);
         pfpUri = Uri.parse(""); // incase use
 
+        UserApi userApi = new UserApi();
+        AddUserCallback callback = this;
 
         // Set onClickListener for the Register button
         buttonRegister.setOnClickListener(new View.OnClickListener() {
@@ -99,19 +107,13 @@ public class RegisterActivity extends AppCompatActivity {
                                 editTextDisplayName.getText().toString(),
                                 editTextPassword.getText().toString());
                     } else {
-                        user = new User(editTextUsername.getText().toString(), pfpUri.toString(),
+                        user = new User(editTextUsername.getText().toString(), basedImage,
                                 editTextDisplayName.getText().toString(),
                                 editTextPassword.getText().toString());
                     }
-                    int code = DB.getUsersDB().addUser(user);
 
-                    if (code == UsersDB.REGISTRATION_FAILED) {
-                        errorUsername.setText("A user with that username already exists");
-                        errorUsername.setVisibility(View.VISIBLE);
-                    }
-                    else {
-                        finish(); // user has registered- take him back to MainActivity
-                    }
+                    userApi.add(user, callback);
+
                 }
 
             }
@@ -202,6 +204,21 @@ public class RegisterActivity extends AppCompatActivity {
         });
         builder.show();
     }
+
+    @Override
+    public void onSuccess() {
+        // user registered successfully
+        Log.v("WHY AM I HERE?" , "PLEASE");
+        finish();
+    }
+
+    @Override
+    public void onFailure() {
+        // user failed to register
+        errorUsername.setText("A user with that username already exists");
+        errorUsername.setVisibility(View.VISIBLE);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -211,7 +228,7 @@ public class RegisterActivity extends AppCompatActivity {
                 pfpUri = data.getData();
                 ContentResolver resolver = this.getContentResolver();
                 resolver.takePersistableUriPermission(pfpUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                // You can use the selectedImageUri as needed (e.g., display in ImageView)
+                basedImage = ImageUtils.encodeImageToBase64(resolver, pfpUri);
                 Toast.makeText(this, "Image selected from gallery", Toast.LENGTH_SHORT).show();
             } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 // data is null here because the uri is decided before capture and passed to the intent

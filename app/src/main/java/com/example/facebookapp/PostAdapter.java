@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +20,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
+
 import java.util.List;
 
 public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentChangeListener {
@@ -27,12 +31,17 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
     private LayoutInflater inflater;
     private Context context;
     private User currentUser;
+    private PostsViewModel viewModel;
 
-    public PostAdapter(Context context, List<Post> postList, User currentUser) {
+    public PostAdapter(Context context, List<Post> postList, User currentUser, ViewModelStoreOwner owner) {
         this.context = context;
         this.postList = postList;
         this.currentUser = currentUser;
         this.inflater = LayoutInflater.from(context);
+        if (currentUser != null) {
+            PostViewModelFactory factory = new PostViewModelFactory(currentUser.getUserId());
+            viewModel = new ViewModelProvider(owner, factory).get(PostsViewModel.class);
+        }
     }
 
     public void updatePosts(List<Post> newPosts) {
@@ -94,10 +103,10 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
         // Display the post image if available
         ImageView postImageView = view.findViewById(R.id.postImageView);
         String imageString = currentPost.getImg();
-        Uri imageUri = Uri.parse(imageString);
         if (!imageString.isEmpty()) {
+            Bitmap postImg= ImageUtils.decodeImageFromBase64(imageString);
+            postImageView.setImageBitmap(postImg);
             postImageView.setVisibility(View.VISIBLE);
-            postImageView.setImageURI(imageUri);
 
         } else {
             postImageView.setVisibility(View.GONE);
@@ -105,30 +114,45 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
 
         ImageView profileImageView = view.findViewById(R.id.profileImageView);
         String userProfilePicString = currentPost.getAuthorPfp();
-        Uri userProfilePicUri = Uri.parse(userProfilePicString);
         if (!userProfilePicString.isEmpty()) {
-            profileImageView.setImageURI(userProfilePicUri);
-            Log.d("UserProfilePicDebug", "UserProfilePicUri: " + userProfilePicUri.toString());
+            Bitmap pfpImg= ImageUtils.decodeImageFromBase64(userProfilePicString);
+            profileImageView.setImageBitmap(pfpImg);
         } else {
             // Set a default profile picture if the user's profile picture is empty
             profileImageView.setImageResource(R.drawable.default_profile_pic);
         }
+        profileImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, FeedActivity.class);
+                intent.putExtra("wallId", currentPost.getAuthorId());
+                context.startActivity(intent);
+
+            }
+        });
 
         // Add click listener to the delete icon
         ImageView deleteIcon = view.findViewById(R.id.deleteIcon);
         deleteIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Remove the current post from the database
-                DB.getPostsDB().deletePost(currentPost);
-
-                // Update the adapter to reflect the changes
                 updatePosts(DB.getPostsDB().getAllPosts());
+                if (viewModel != null ) {
+                    viewModel.delete(currentPost);
+                }
             }
         });
 
         // Add click listener to the edit icon
         ImageView editIcon = view.findViewById(R.id.editIcon);
+        if (currentUser != null && (currentPost.getAuthorId() != currentUser.getUserId())) {
+            deleteIcon.setVisibility(View.INVISIBLE);
+            editIcon.setVisibility(View.INVISIBLE);
+        }
+        else {
+            deleteIcon.setVisibility(View.VISIBLE);
+            editIcon.setVisibility(View.VISIBLE);
+        }
         editIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -217,7 +241,7 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
                             currentUser.getUserName(), currentUser.getUserPfp(), 1);
 
                     // Update the post in the database with the new comment
-                    DB.getPostsDB().getPostById(currentPost.getPostId()).addComment(currentUser, newComment.getContent());
+                    DB.getPostsDB().getPostById(currentPost.getPostId()).addComment(newComment);
 
                     // Update the CommentAdapter to reflect the new comment
                     commentAdapter.updateComments(DB.getPostsDB().getPostById(currentPost.getPostId()).getComments());
@@ -271,8 +295,10 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
 
                 if (!updatedPostText.isEmpty()) {
                     post.setContent(updatedPostText);
-                    DB.getPostsDB().editPost(post, updatedPostText, ""); // Update post in the database
-                    updatePosts(DB.getPostsDB().getAllPosts());
+                    if (viewModel != null) {
+                        post.setContent(updatedPostText);
+                        viewModel.edit(post);
+                    }
                 } else {
                     // Show a toast message or take appropriate action for empty post
                     Toast.makeText(context, "Post cannot be empty", Toast.LENGTH_SHORT).show();
@@ -287,7 +313,22 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
             }
         });
 
-        builder.show();
+        AlertDialog dialog = builder.create();
+
+        // Set button colors
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                Button positiveButton = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                Button negativeButton = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_NEGATIVE);
+
+                // Set button text color
+                positiveButton.setTextColor(context.getResources().getColor(android.R.color.black));
+                negativeButton.setTextColor(context.getResources().getColor(android.R.color.black));
+            }
+        });
+
+        dialog.show();
     }
 
 }

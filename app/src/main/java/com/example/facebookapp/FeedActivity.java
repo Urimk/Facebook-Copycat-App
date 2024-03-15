@@ -5,11 +5,14 @@ import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +20,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -25,6 +29,15 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.FileProvider;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import com.example.facebookapp.callbacks.AddFriendCallback;
+import com.example.facebookapp.callbacks.GetFriendsCallback;
+import com.example.facebookapp.callbacks.GetUserCallback;
+import com.example.facebookapp.returntypes.UserIdResponse;
+import com.google.gson.Gson;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -33,7 +46,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class FeedActivity extends AppCompatActivity {
+public class FeedActivity extends AppCompatActivity implements GetUserCallback, AddFriendCallback, GetFriendsCallback {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_PICKER = 2;
@@ -42,19 +55,41 @@ public class FeedActivity extends AppCompatActivity {
     private ImageButton imageUploadButton;
     private Button postButton;
     private ListView postsListView;
+    private TextView usernameTextView;
 
     private User currentUser;  // Sample session user
+    private User wallUser;
 
     private Uri selectedImageUri;  // Use Uri instead of Bitmap
+    private String basedImage;
+    private PostAdapter adapter;
+    private List<Post> postList;
+    private SwipeRefreshLayout refreshLayout;
+    private ImageView wallPfp;
+    private TextView wallNick;
+    private int wallId = -1;
+    private ImageButton addFriendBtn;
+    private int userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        PostsViewModel viewModel;
         Intent intent = getIntent();
+        UserApi userApi = new UserApi();
         if (intent != null) {
             String username = intent.getStringExtra("username");
-            currentUser = DB.getUsersDB().getUserByUserName(username);
+            SharedPreferences sharedPreferences = this.getSharedPreferences("MyPrefs", this.MODE_PRIVATE);
+            String jwt = sharedPreferences.getString("jwt", null);
+            String[] jwtParts = jwt.split("\\.");
+            String payload = jwtParts[1];
+            byte[] decodedBytes = Base64.decode(payload, Base64.DEFAULT);
+            String decodedPayLoad = new String(decodedBytes);
+            Gson gson = new Gson();
+            UserIdResponse response = gson.fromJson(decodedPayLoad, UserIdResponse.class);
+            int userId = response.getUserId();
+
+            userApi.getUser(userId,false, this);
             setContentView(R.layout.activity_feed);
         }
         else {
@@ -62,15 +97,58 @@ public class FeedActivity extends AppCompatActivity {
             return;
         }
 
-
+        PostViewModelFactory factory;
         // Initialize UI components
         postEditText = findViewById(R.id.postEditText);
         imageUploadButton = findViewById(R.id.imageUploadButton);
         postButton = findViewById(R.id.postButton);
         postsListView = findViewById(R.id.postsListView);
-        TextView usernameTextView = findViewById(R.id.usernameTextView);
+        usernameTextView = findViewById(R.id.usernameTextView);
+        refreshLayout = findViewById(R.id.swipe_refresh_layout);
         Button logoutButton = findViewById(R.id.logoutButton);
         ToggleButton darkModeToggle = findViewById((R.id.darkModeToggle));
+        if (intent.hasExtra("wallId")) {
+            refreshLayout.setVisibility(View.GONE);
+            // feed is a wall, hide search and new post
+            RelativeLayout searchLayout = findViewById(R.id.topMenuLayout);
+            RelativeLayout writePostLayout = findViewById(R.id.writePostLayout);
+            RelativeLayout wallInfoLayout = findViewById(R.id.wallInfoLayout);
+            wallId = intent.getIntExtra("wallId", -1);
+            searchLayout.setVisibility(View.GONE);
+            writePostLayout.setVisibility(View.GONE);
+            wallInfoLayout.setVisibility(View.VISIBLE);
+            // set posts layout below the new wall info layout
+            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) refreshLayout.getLayoutParams();
+            params.addRule(RelativeLayout.BELOW, R.id.wallInfoLayout);
+            refreshLayout.setLayoutParams(params);
+            addFriendBtn = findViewById(R.id.addFriend);
+            FriendApi friendApi = new FriendApi();
+            AddFriendCallback callback = this;
+            addFriendBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    friendApi.add(wallId, callback);
+
+                }
+            });
+            wallPfp = findViewById(R.id.wallPfp);
+            wallNick = findViewById(R.id.wallUsernick);
+            userApi.getUser(wallId, true, this);
+            factory = new PostViewModelFactory(userId, wallId);
+        }
+        else {
+            factory = new PostViewModelFactory(userId);
+        }
+        viewModel = new ViewModelProvider(this, factory).get(PostsViewModel.class);
+        viewModel.reload();
+
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                viewModel.reload();
+            }
+        });
+        ImageButton friendRequestsButton = findViewById(R.id.friendRequestsButton);
 
         darkModeToggle.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,6 +174,17 @@ public class FeedActivity extends AppCompatActivity {
             }
         });
 
+        // Set click listener for the Friend Requests button
+        friendRequestsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Start the RequestsActivity
+                Intent intent = new Intent(FeedActivity.this, RequestsActivity.class);
+                intent.putExtra("userId", currentUser.getUserId());
+                startActivity(intent);
+            }
+        });
+
         logoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -103,24 +192,7 @@ public class FeedActivity extends AppCompatActivity {
             }
         });
 
-        if (currentUser.getUserName() != null) {
-            usernameTextView.setText(currentUser.getUserNick());
-        }
 
-        // Inside FeedActivity, after initializing UI components
-        ImageView profileImageView = findViewById(R.id.profileImageView);
-
-        // Set the profile image URI if available
-        String profileImageUriString = currentUser.getUserPfp();
-        if (!profileImageUriString.isEmpty()) {
-            Uri profileImageUri = Uri.parse(profileImageUriString);
-
-            profileImageView.setImageURI(profileImageUri);
-
-        } else {
-            // Set a default image or handle the case when there is no profile image
-            profileImageView.setImageResource(R.drawable.default_profile_pic);
-        }
 
         // Set click listener for the Image Upload button
         imageUploadButton.setOnClickListener(new View.OnClickListener() {
@@ -140,16 +212,8 @@ public class FeedActivity extends AppCompatActivity {
                     String imageUriString = (selectedImageUri != null) ? selectedImageUri.toString() : "";
 
                     // Create a new Post object using the sample session user's data
-                    Post newPost = new Post(currentUser.getUserName(), currentUser.getUserPfp(), postText, imageUriString, currentUser.getUserId());
-
-                    // Update the posts in the database
-                    DB.getPostsDB().addPost(newPost);
-
-                    // Retrieve all posts from the database
-                    List<Post> allPosts = DB.getPostsDB().getAllPosts();
-
-                    // Update the ListView with the retrieved posts
-                    ((PostAdapter) postsListView.getAdapter()).updatePosts(allPosts);
+                    Post newPost = new Post(currentUser.getUserName(), currentUser.getUserPfp(), postText, basedImage, currentUser.getUserId());
+                    viewModel.add(newPost);
 
                     // Clear the EditText and reset the selectedImageUri after posting
                     postEditText.getText().clear();
@@ -162,15 +226,21 @@ public class FeedActivity extends AppCompatActivity {
         });
 
         // Set up the ListView with the PostAdapter
-        PostAdapter adapter = new PostAdapter(this, new ArrayList<>(), currentUser);
+        adapter = new PostAdapter(this, new ArrayList<>(), currentUser, this);
         postsListView.setAdapter(adapter);
 
         // Retrieve all posts from the database
-        List<Post> allPosts = DB.getPostsDB().getAllPosts();
-
-        // Update the ListView with the retrieved posts
-        adapter.updatePosts(allPosts);
-        adapter.notifyDataSetChanged();
+        postList = new ArrayList<Post>();
+        viewModel.get().observe(this, new Observer<List<Post>>() {
+            @Override
+            public void onChanged(List<Post> posts) {
+                postList = posts;
+                // Update the ListView with the retrieved posts
+                adapter.updatePosts(postList);
+                adapter.notifyDataSetChanged();
+                refreshLayout.setRefreshing(false);
+            }
+        });
     }
 
     private void dispatchImagePickerIntent() {
@@ -239,6 +309,7 @@ public class FeedActivity extends AppCompatActivity {
                 selectedImageUri = data.getData();
                 ContentResolver resolver = this.getContentResolver();
                 resolver.takePersistableUriPermission(selectedImageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                basedImage = ImageUtils.encodeImageToBase64(resolver, selectedImageUri);
                 // You can use the selectedImageUri as needed (e.g., display in ImageView)
                 Toast.makeText(this, "Image selected from gallery", Toast.LENGTH_SHORT).show();
             } else if (requestCode == REQUEST_IMAGE_CAPTURE) {
@@ -250,4 +321,62 @@ public class FeedActivity extends AppCompatActivity {
         }
     }
 
+    private void showUserInfo() {
+        if (currentUser.getUserName() != null) {
+            usernameTextView.setText(currentUser.getUserNick());
+        }
+
+        // Inside FeedActivity, after initializing UI components
+        ImageView profileImageView = findViewById(R.id.profileImageView);
+
+        // Set the profile image URI if available
+        String profileImageUriString = currentUser.getUserPfp();
+        if (!profileImageUriString.isEmpty()) {
+            profileImageView.setImageBitmap(ImageUtils.decodeImageFromBase64(currentUser.getUserPfp()));
+
+        } else {
+            // Set a default image or handle the case when there is no profile image
+            profileImageView.setImageResource(R.drawable.default_profile_pic);
+        }
+    }
+
+    @Override
+    public void onSuccess(User user, boolean isWallUser) {
+        if (!isWallUser) {
+            currentUser = user;
+            showUserInfo();
+            adapter = new PostAdapter(this, new ArrayList<>(), currentUser, this);
+            postsListView.setAdapter(adapter);
+            FriendApi friendApi = new FriendApi();
+            friendApi.getFriends(currentUser.getUserId(), this);
+        }
+        else {
+            wallUser = user;
+            Bitmap img = ImageUtils.decodeImageFromBase64(wallUser.getUserPfp());
+            wallPfp.setImageBitmap(img);
+            wallNick.setText(wallUser.getUserNick());
+        }
+    }
+
+    @Override
+    public void onSuccess() {
+        addFriendBtn.setBackgroundColor(Color.BLUE);
+    }
+
+    @Override
+    public void onSuccess(List<FriendRequest> friendsList) {
+        for (int i = 0; i < friendsList.size(); i++) {
+            if (friendsList.get(i).getUserId() == wallId || (currentUser.getUserId() == wallId)) {
+                // connected and wall are friends show post
+                refreshLayout.setVisibility(View.VISIBLE);
+                addFriendBtn.setVisibility(View.GONE);
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void onFailure() {
+
+    }
 }
