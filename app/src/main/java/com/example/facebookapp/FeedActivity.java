@@ -134,10 +134,10 @@ public class FeedActivity extends AppCompatActivity implements GetUserCallback, 
             wallPfp = findViewById(R.id.wallPfp);
             wallNick = findViewById(R.id.wallUsernick);
             userApi.getUser(wallId, true, this);
-            factory = new PostViewModelFactory(userId, wallId);
+            factory = new PostViewModelFactory(userId, wallId, this);
         }
         else {
-            factory = new PostViewModelFactory(userId);
+            factory = new PostViewModelFactory(userId, this);
         }
         viewModel = new ViewModelProvider(this, factory).get(PostsViewModel.class);
         viewModel.reload();
@@ -379,4 +379,6 @@ public class FeedActivity extends AppCompatActivity implements GetUserCallback, 
     public void onFailure() {
 
     }
+
+
 }
