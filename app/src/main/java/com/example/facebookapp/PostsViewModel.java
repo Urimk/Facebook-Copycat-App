@@ -1,5 +1,7 @@
 package com.example.facebookapp;
 
+import android.content.Context;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -9,12 +11,12 @@ public class PostsViewModel extends ViewModel {
     private PostsRepository repository;
     private LiveData<List<Post>> posts;
 
-    public PostsViewModel(int loggedInUserId, int feedUserId) {
+    public PostsViewModel(int loggedInUserId, int feedUserId, Context context) {
         if (feedUserId == -1) {
-            this.repository = new PostsRepository(loggedInUserId);
+            this.repository = new PostsRepository(loggedInUserId, context);
         }
         else {
-            this.repository = new PostsRepository(loggedInUserId, feedUserId);
+            this.repository = new PostsRepository(loggedInUserId, feedUserId, context);
         }
         this.posts = this.repository.getAll();
     }

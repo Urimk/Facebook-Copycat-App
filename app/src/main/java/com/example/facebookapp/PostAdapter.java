@@ -39,7 +39,7 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
         this.currentUser = currentUser;
         this.inflater = LayoutInflater.from(context);
         if (currentUser != null) {
-            PostViewModelFactory factory = new PostViewModelFactory(currentUser.getUserId());
+            PostViewModelFactory factory = new PostViewModelFactory(currentUser.getUserId(), context);
             viewModel = new ViewModelProvider(owner, factory).get(PostsViewModel.class);
         }
     }
@@ -292,12 +292,14 @@ public class PostAdapter extends BaseAdapter implements CommentAdapter.CommentCh
             public void onClick(DialogInterface dialog, int which) {
                 // Update the post content and notify the adapter if the text is not empty
                 String updatedPostText = editPostEditText.getText().toString().trim();
+                Post editedPost = new Post(post);
 
                 if (!updatedPostText.isEmpty()) {
-                    post.setContent(updatedPostText);
+                    //post.setContent(updatedPostText);
+                    editedPost.setContent(updatedPostText);
                     if (viewModel != null) {
-                        post.setContent(updatedPostText);
-                        viewModel.edit(post);
+                        //post.setContent(updatedPostText);
+                        viewModel.edit(editedPost);
                     }
                 } else {
                     // Show a toast message or take appropriate action for empty post

@@ -1,7 +1,11 @@
 package com.example.facebookapp;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.util.Log;
+import android.widget.Button;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.MutableLiveData;
 
 import java.util.List;
@@ -24,10 +28,11 @@ public class PostAPI {
     private int feedUserId = HOME_PAGE_FEED;
     //the id of the user currently logged into the app
     private int loggedInUserId;
+    private Context context;
 
     private final String BASE_URL = "http://10.0.2.2:3001/api/";
 
-    public PostAPI(MutableLiveData<List<Post>> postListData, PostDao postDao, int loggedInUserId) {
+    public PostAPI(MutableLiveData<List<Post>> postListData, PostDao postDao, int loggedInUserId, Context context) {
         this.postListData = postListData;
         this.dao = postDao;
 
@@ -43,11 +48,12 @@ public class PostAPI {
                 .build();
         webServiceAPI = retrofit.create(WebServiceAPI.class);
         this.loggedInUserId = loggedInUserId;
+        this.context = context;
     }
 
     public PostAPI(MutableLiveData<List<Post>> postListData, PostDao postDao, int loggedInUserId,
-                   int feedUserId) {
-        this(postListData, postDao, loggedInUserId);
+                   int feedUserId, Context context) {
+        this(postListData, postDao, loggedInUserId, context);
         this.feedUserId = feedUserId;
     }
 
@@ -98,6 +104,10 @@ public class PostAPI {
                 //post was added remotely, add to local storage
                 if (!response.isSuccessful()) {
                     // response failed handle failure, get a new token(?)
+                    if (response.code() == 403) {
+                        // a blacklisted url was present
+                        showAlert("Blacklisted url!", "The post was not posted because it contained a blacklisted url");
+                    }
                     Log.v("postApi fail", "failed to add post");
                 }
                 else {
@@ -157,9 +167,14 @@ public class PostAPI {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (!response.isSuccessful()) {
                     // response failed handle failure, get a new token(?)
+                    if (response.code() == 403) {
+                        // a blacklisted url was present
+                        showAlert("Blacklisted url!", "The post was not edited because it contained a blacklisted url");
+                    }
                     Log.v("postApi fail", "failed to update post");
                 }
                 else {
+                    Log.v("SURELY NOT", "NO");
                     new Thread(() -> {
                         dao.update(post);
                         List<Post> posts = postListData.getValue();
@@ -222,5 +237,28 @@ public class PostAPI {
             }
         });
 
+    }
+    public void showAlert(String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this.context);
+        builder.setTitle(title)
+                .setMessage(message)
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialogInterface.dismiss();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                Button positiveButton = ((AlertDialog) alert).getButton(android.app.AlertDialog.BUTTON_POSITIVE);
+
+                // Set button text color
+                positiveButton.setTextColor(context.getResources().getColor(android.R.color.black));
+            }
+        });
+        alert.show();
     }
 }

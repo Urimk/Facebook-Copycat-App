@@ -96,6 +96,20 @@ public class Post {
         }
     }
 
+    public Post(Post post) {
+        this.postId = post.postId;
+        this.likes = post.likes;
+        this.shares = post.shares;
+        this.authorId = post.authorId;
+        this.postTime = post.postTime;
+        this.edited = post.edited;
+        this.content = post.content;
+        this.authorName = post.authorName;
+        this.authorPfp = post.authorPfp;
+        this.img = post.img;
+        this.comments = post.comments;
+    }
+
     public int getPostId() {
         return postId;
     }

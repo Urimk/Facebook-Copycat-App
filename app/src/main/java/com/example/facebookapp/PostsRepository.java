@@ -1,5 +1,7 @@
 package com.example.facebookapp;
 
+import android.content.Context;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -10,18 +12,18 @@ public class PostsRepository {
     private MutableLiveData<List<Post>> postListData;
     private PostAPI api;
 
-    public PostsRepository(int loggedInUserId) {
+    public PostsRepository(int loggedInUserId, Context context) {
         AppDB db = AppDB.getInstance();
         dao = db.postDao();
         postListData = new MutableLiveData<>();
-        api = new PostAPI(postListData, dao, loggedInUserId);
+        api = new PostAPI(postListData, dao, loggedInUserId, context);
     }
 
-    public PostsRepository(int loggedInUserId, int feedUserId) {
+    public PostsRepository(int loggedInUserId, int feedUserId, Context context) {
         AppDB db = AppDB.getInstance();
         dao = db.postDao();
         postListData = new MutableLiveData<>();
-        api = new PostAPI(postListData, dao, loggedInUserId, feedUserId);
+        api = new PostAPI(postListData, dao, loggedInUserId, feedUserId, context);
     }
 
     public LiveData<List<Post>> getAll() {
